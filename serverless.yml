@@ -102,7 +102,10 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:us-east-1:927245588110:table/eventsTable/stream/2018-08-31T02:59:58.354
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   handleConnectUsers2:
     handler: connectionHandler.handleConnectUsers2
     events:
@@ -141,7 +144,10 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:us-east-1:927245588110:table/eventsTable/stream/2018-08-31T02:59:58.354
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   verify:
     handler: user-management.verify
     events:
@@ -153,7 +159,56 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:us-east-1:927245588110:table/eventsTable/stream/2018-08-31T02:59:58.354
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
+  addPresent:
+    handler: presentHandler.addNew
+    events:
+      - http:
+          method: post
+          path: /my/presents
+          cors: true
+          authorizer: authorizer
+  handleAddPresent:
+    handler: presentHandler.handleAddNew
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
+  getUserPresents:
+    handler: presentHandler.getUserPresents
+    events:
+      - http:
+          method: get
+          path: /my/presents
+          cors: true
+          authorizer: authorizer
+  deletePresent:
+    handler: presentHandler.deletePresent
+    events:
+      - http:
+          method: delete
+          path: /my/presents/{presentId}
+          request:
+            parameters:
+              paths:
+                presentId: true
+          cors: true
+          authorizer: authorizer
+  handleDeletePresent:
+    handler: presentHandler.handleDeletePresent
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
 
 
 

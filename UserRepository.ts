@@ -18,8 +18,6 @@ export class UserRepository {
 
         const response = await this.dynamoClient.get(findUserNameRequest).promise();
 
-        console.log(response);
-
         if(response.Item == undefined) {
             throw new Error("No user found");
         }
@@ -36,7 +34,6 @@ export class UserRepository {
             }
         };
 
-        console.log(findByUserIdRequest);
         let response = await this.dynamoClient.scan(findByUserIdRequest).promise();
     
         if(response.Items.length != 1) {
@@ -57,13 +54,7 @@ export class UserRepository {
             }
         };
 
-        console.log("Request");
-        console.log(findUsersByIds);
-
         const response = await this.dynamoClient.scan(findUsersByIds).promise();
-
-        console.log("Result");
-        console.log(response);
 
         return <User[]>response.Items;
     }
@@ -89,17 +80,18 @@ export class UserRepository {
             const updateRequest = <UpdateItemInput>{
                 TableName: 'userTable',
                 Key: {'user_name': user.user_name},
-                UpdateExpression: "set first_name = :firstName, last_name = :lastName, email_address = :emailAddress, password = :password, following_user_ids = :followingUserIds",
+                UpdateExpression: "set first_name = :firstName, last_name = :lastName, email_address = :emailAddress, password = :password, following_user_ids = :followingUserIds, presents = :presents",
                 ExpressionAttributeValues:{
                     ":firstName": user.first_name,
                     ":lastName": user.last_name,
                     ":emailAddress": user.email_address,
                     ":password": user.password,
-                    ":followingUserIds": user.followingUserIds
+                    ":followingUserIds": user.followingUserIds,
+                    ":presents": user.presents
                 },
                 ReturnValues: "UPDATED_NEW"
             }
-    
+
             const updateResponse = await this.dynamoClient.update(updateRequest).promise();
     
             return updateResponse.$response;

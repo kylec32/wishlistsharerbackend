@@ -87,7 +87,6 @@ export const handleDisconnectUser: Handler = (event: DynamoDBStreamEvent, contex
         try {
             
             Utils.filterEventStream('disconnect-user', event, (data, sourceRecord) => {
-                console.log()
                 connectionService.disconnectFollowee(data.connector, data.connecteeId)
                                     .then((event) => {
                                         eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'users-disconnected', Utils.getEvent(sourceRecord).Payload);

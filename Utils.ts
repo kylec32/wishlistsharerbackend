@@ -19,7 +19,6 @@ export class Utils {
         event.Records.forEach((record) => {
             try {
                 const event = <Event>DynamoDB.Converter.unmarshall(record.dynamodb.NewImage);
-                console.log(event);
                 if(event.Type == type) {
                     found(event.Payload, record);
                 }
@@ -33,4 +32,5 @@ export class Utils {
         console.log(dbRecord.dynamodb);
         return <Event>DynamoDB.Converter.unmarshall(dbRecord.dynamodb.NewImage);
     }
+
 }
