@@ -188,6 +188,27 @@ functions:
           path: /my/presents
           cors: true
           authorizer: authorizer
+  updatePresent:
+    handler: presentHandler.update
+    events:
+      - http:
+          method: put
+          path: /my/presents/{presentId}
+          request:
+            parameters:
+              paths:
+                presentId: true
+          cors: true
+          authorizer: authorizer
+  handleUpdatePresent:
+    handler: presentHandler.handleUpdate
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   deletePresent:
     handler: presentHandler.deletePresent
     events:
@@ -209,6 +230,15 @@ functions:
             Fn::GetAtt:
               - eventsTable
               - StreamArn
+  getFollowedPresents:
+    handler: followedPresentHandler.getPresents
+    events:
+      - http:
+          method: get
+          path: /presents
+          cors: true
+          authorizer: authorizer
+
 
 
 

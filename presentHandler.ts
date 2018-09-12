@@ -1,9 +1,8 @@
-import { APIGatewayEvent, DynamoDBStreamEvent, DynamoDBRecord, Callback, Context, Handler } from 'aws-lambda';
+import { APIGatewayEvent, DynamoDBStreamEvent, Callback, Context, Handler } from 'aws-lambda';
 import { EventStore } from './EventStore';
 import { ResponseHelper } from './ResponseHelper';
 import { Utils } from './Utils';
 import { PresentService } from './PresentService';
-import { PresentView } from './models/PresentView';
 
 const eventStore = new EventStore();
 const presentService = new PresentService();
@@ -28,7 +27,42 @@ export const handleAddNew: Handler = (event: DynamoDBStreamEvent, context: Conte
                                     })
                                     .catch((error) => {
                                         console.log("Error");
-                                        console.error(error)
+                                        console.error(error);
+                                        cb(error);
+                                    });
+            });
+    
+            cb(null, "Handled");
+        } catch(ex) {
+            console.error(ex);
+            cb(ex);
+        }
+    })();
+}
+
+export const update: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+    (async () => {
+        await eventStore.publish(context.awsRequestId, "update-present", {"userId": event.requestContext.authorizer.principalId,
+                                                                    "presentId": event.pathParameters.presentId,
+                                                                    "present": event.body});
+
+        cb(null, ResponseHelper.simpleMessage(200, "Updated Present"));
+    })()
+}
+
+export const handleUpdate: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+    (async () => {
+        try {
+            
+            Utils.filterEventStream('update-present', event, (data, sourceRecord) => {
+                presentService.updatePresent(data.userId, data.presentId, JSON.parse(data.present))
+                                    .then((event) => {
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-updated', Utils.getEvent(sourceRecord).Payload);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Error");
+                                        console.error(error);
+                                        cb(error);
                                     });
             });
     
@@ -72,7 +106,8 @@ export const handleDeletePresent: Handler = (event: DynamoDBStreamEvent, context
                                     })
                                     .catch((error) => {
                                         console.log("Error");
-                                        console.error(error)
+                                        console.error(error);
+                                        cb(error);
                                     });
             });
     

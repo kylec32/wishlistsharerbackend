@@ -86,8 +86,8 @@ export class UserRepository {
                     ":lastName": user.last_name,
                     ":emailAddress": user.email_address,
                     ":password": user.password,
-                    ":followingUserIds": user.followingUserIds,
-                    ":presents": user.presents
+                    ":followingUserIds": user.followingUserIds == undefined ? [] : user.followingUserIds,
+                    ":presents": user.presents == undefined ? [] : user.presents
                 },
                 ReturnValues: "UPDATED_NEW"
             }
