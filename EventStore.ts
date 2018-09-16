@@ -22,7 +22,6 @@ export class EventStore {
         }
 
         try {
-            await this.sns.publish(params)
             this.sns.publish(params, (err: AWSError, data: PublishResponse) => {
                 if(err) {
                     console.error(err);

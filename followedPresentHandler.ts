@@ -3,10 +3,11 @@ import { EventStore } from './EventStore';
 import { ResponseHelper } from './ResponseHelper';
 import { Utils } from './Utils';
 import { PresentService } from './PresentService';
+var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const presentService = new PresentService();
 
-export const getPresents: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const getPresents: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             cb(null, ResponseHelper.withJson(200,
@@ -19,4 +20,4 @@ export const getPresents: Handler = (event: APIGatewayEvent, context: Context, c
             cb(null, ResponseHelper.withJson(500, []));
         }
     })()
-}
+});

@@ -4,12 +4,13 @@ import { ResponseHelper } from './ResponseHelper';
 import { ConnectionService } from './ConnectionService';
 import { EventStore } from './EventStore';
 import { Utils } from './Utils';
+var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const userRepository = new UserRepository();
 const connectionService = new ConnectionService();
 const eventStore = new EventStore();
 
-export const addNew: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         if(await userRepository.userExists(decodeURIComponent(event.pathParameters.identifier))) {
             eventStore.publish(context.awsRequestId, "connect-user", {"connector": event.requestContext.authorizer.principalId,
@@ -20,9 +21,9 @@ export const addNew: Handler = (event: APIGatewayEvent, context: Context, cb: Ca
             cb(null, ResponseHelper.simpleMessage(404, "User not found"));
         }
     })()
-}
+});
 
-export const handleConnectUsers: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleConnectUsers: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async() => {
         event.Records.forEach((record) => {
             Utils.filterEvent('connect-user', record, (data) => {
@@ -40,9 +41,9 @@ export const handleConnectUsers: Handler = (event: DynamoDBStreamEvent, context:
 
         cb(null, "Handled");
     })();
-}
+});
 
-export const handleConnectUsers2: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleConnectUsers2: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async() => {
         event.Records.forEach((record) => {
             
@@ -53,9 +54,9 @@ export const handleConnectUsers2: Handler = (event: DynamoDBStreamEvent, context
 
         cb(null, "Handled");
     })();
-}
+});
 
-export const getConnections: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const getConnections: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             const result = await connectionService.getFollowees(event.requestContext.authorizer.principalId);
@@ -66,9 +67,9 @@ export const getConnections: Handler = (event: APIGatewayEvent, context: Context
             cb(null, ResponseHelper.simpleMessage(500, "Issue occurred"));
         }
     })();
-}
+});
 
-export const deleteConnection: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const deleteConnection: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             eventStore.publish(context.awsRequestId, "disconnect-user",
@@ -80,9 +81,9 @@ export const deleteConnection: Handler = (event: APIGatewayEvent, context: Conte
             cb(null, ResponseHelper.simpleMessage(500, "Issue Occurred"))
         }
     })();
-}
+});
 
-export const handleDisconnectUser: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleDisconnectUser: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             
@@ -103,4 +104,4 @@ export const handleDisconnectUser: Handler = (event: DynamoDBStreamEvent, contex
             cb(ex);
         }
     })();
-}
+});

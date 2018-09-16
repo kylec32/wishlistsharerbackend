@@ -2,7 +2,6 @@ service:
   name: eventSourceSystem
 
 plugins:
-  - serverless-plugin-iopipe
   - serverless-webpack
   - serverless-offline
 
@@ -58,12 +57,9 @@ provider:
 functions:
   authorizer:
     handler: user-management.authorizer
-  hello:
-    handler: handler.hello
+  presistEvent:
+    handler: eventHandler.persistEvent
     events:
-      - http:
-          method: post
-          path: hello
       - sns:
           arn:
             Fn::Join:

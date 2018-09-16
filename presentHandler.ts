@@ -3,20 +3,21 @@ import { EventStore } from './EventStore';
 import { ResponseHelper } from './ResponseHelper';
 import { Utils } from './Utils';
 import { PresentService } from './PresentService';
+var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const eventStore = new EventStore();
 const presentService = new PresentService();
 
-export const addNew: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "add-present", {"userId": event.requestContext.authorizer.principalId,
                                                                     "present": event.body});
 
         cb(null, ResponseHelper.simpleMessage(200, "Added Present"));
     })()
-}
+});
 
-export const handleAddNew: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleAddNew: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -38,9 +39,9 @@ export const handleAddNew: Handler = (event: DynamoDBStreamEvent, context: Conte
             cb(ex);
         }
     })();
-}
+});
 
-export const update: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const update: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "update-present", {"userId": event.requestContext.authorizer.principalId,
                                                                     "presentId": event.pathParameters.presentId,
@@ -48,9 +49,9 @@ export const update: Handler = (event: APIGatewayEvent, context: Context, cb: Ca
 
         cb(null, ResponseHelper.simpleMessage(200, "Updated Present"));
     })()
-}
+});
 
-export const handleUpdate: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleUpdate: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -72,9 +73,9 @@ export const handleUpdate: Handler = (event: DynamoDBStreamEvent, context: Conte
             cb(ex);
         }
     })();
-}
+});
 
-export const getUserPresents: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const getUserPresents: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             cb(null, ResponseHelper.withJson(200, await presentService.getUserPresents(event.requestContext.authorizer.principalId)));
@@ -84,18 +85,18 @@ export const getUserPresents: Handler = (event: APIGatewayEvent, context: Contex
             cb(null, ResponseHelper.simpleMessage(500, "Issue encountered"));
         }
     })();
-}
+});
 
-export const deletePresent: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const deletePresent: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "delete-present", {"userId": event.requestContext.authorizer.principalId,
                                                                     "presentId": decodeURIComponent(event.pathParameters.presentId)});
 
         cb(null, ResponseHelper.simpleMessage(200, "Deleted-Present"));
     })();
-}
+});
 
-export const handleDeletePresent: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleDeletePresent: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -117,9 +118,9 @@ export const handleDeletePresent: Handler = (event: DynamoDBStreamEvent, context
             cb(ex);
         }
     })();
-}
+});
 
-export const markAsPurchased: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const markAsPurchased: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "mark-present-as-purchased", {"userId": event.requestContext.authorizer.principalId,
                                                                     "targetUserId": decodeURIComponent(event.pathParameters.userId),
@@ -127,9 +128,9 @@ export const markAsPurchased: Handler = (event: APIGatewayEvent, context: Contex
 
         cb(null, ResponseHelper.simpleMessage(200, "Mark-As-Purchased"));
     })();
-}
+});
 
-export const handleMarkAsPurchased: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleMarkAsPurchased: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -151,9 +152,9 @@ export const handleMarkAsPurchased: Handler = (event: DynamoDBStreamEvent, conte
             cb(ex);
         }
     })();
-}
+});
 
-export const unmarkAsPurchased: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const unmarkAsPurchased: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "unmark-present-as-purchased", {"userId": event.requestContext.authorizer.principalId,
                                                                     "targetUserId": decodeURIComponent(event.pathParameters.userId),
@@ -161,9 +162,9 @@ export const unmarkAsPurchased: Handler = (event: APIGatewayEvent, context: Cont
 
         cb(null, ResponseHelper.simpleMessage(200, "Unmark-As-Purchased"));
     })();
-}
+});
 
-export const handleUnmarkAsPurchased: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleUnmarkAsPurchased: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -185,4 +186,4 @@ export const handleUnmarkAsPurchased: Handler = (event: DynamoDBStreamEvent, con
             cb(ex);
         }
     })();
-}
+});

@@ -1,6 +1,6 @@
 import { APIGatewayEvent, DynamoDBStreamEvent, CustomAuthorizerEvent, CustomAuthorizerResult, PolicyDocument, Statement, DynamoDBRecord, Callback, Context, Handler, StatementAction, StatementResource } from 'aws-lambda';
-import { SQS, DynamoDB, SNS, AWSError } from 'aws-sdk';
-import { GetItemInput, ScanInput, PutItemInput } from 'aws-sdk/clients/dynamodb';
+import { DynamoDB} from 'aws-sdk';
+import { GetItemInput, PutItemInput } from 'aws-sdk/clients/dynamodb';
 import * as uuid from 'uuid/v1';
 import * as bcryptjs from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
@@ -9,6 +9,7 @@ import { Event } from './message';
 import { UserRepository } from './UserRepository';
 import { EventStore } from './EventStore';
 import { ResponseHelper } from './ResponseHelper';
+var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const dynamoClient = new DynamoDB.DocumentClient({region: 'us-east-1'});
 const eventStore = new EventStore();
@@ -16,7 +17,7 @@ const userRepository = new UserRepository();
 const privateKey = fs.readFileSync('./keys/private.key');
 const publicKey = fs.readFileSync('./keys/public.key');
 
-export const authorizer: Handler = (event: CustomAuthorizerEvent, context: Context, cb: Callback) => {
+export const authorizer: Handler = iopipe((event: CustomAuthorizerEvent, context: Context, cb: Callback) => {
     if (event.authorizationToken) {
         // remove "bearer " from token
         const token = event.authorizationToken.substring(7);
@@ -35,7 +36,7 @@ export const authorizer: Handler = (event: CustomAuthorizerEvent, context: Conte
         console.log(event);
         cb(null, 'Unauthorized');
       }
-}
+});
 
 function generatePolicy(principalId, effect, resource): CustomAuthorizerResult {
     const authResponse = <CustomAuthorizerResult>{};
@@ -55,7 +56,7 @@ function generatePolicy(principalId, effect, resource): CustomAuthorizerResult {
     return authResponse;
 };
 
-export const verify: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const verify: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     const params = <GetItemInput>{
         TableName: 'userTable',
         Key: {'user_name': 1535432690997}
@@ -79,9 +80,9 @@ export const verify: Handler = (event: APIGatewayEvent, context: Context, cb: Ca
             body: 'Looks good',
         });
     });
-}
+});
 
-export const signIn: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const signIn: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     const body = JSON.parse(event.body);
     (async() => {
         try {
@@ -109,7 +110,7 @@ export const signIn: Handler = (event: APIGatewayEvent, context: Context, cb: Ca
                                                     'token': ''}));
         }
     })();
-}
+});
 
 function handleEvent(type: string, dbRecord: DynamoDBRecord, found: (data: any) => void): void   {
     const event = <Event>DynamoDB.Converter.unmarshall(dbRecord.dynamodb.NewImage);
@@ -119,7 +120,7 @@ function handleEvent(type: string, dbRecord: DynamoDBRecord, found: (data: any) 
     }
 }
 
-export const handleSignUpEvent: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleSignUpEvent: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     event.Records.forEach(record => {
         handleEvent("sign-up", record, (newSignup: any) => {
             console.log(record);
@@ -150,9 +151,9 @@ export const handleSignUpEvent: Handler = (event: DynamoDBStreamEvent, context: 
     });
 
     cb(null, "Handled Sign Up");
-}
+});
 
-export const signUp: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
 
         try {
@@ -187,7 +188,7 @@ export const signUp: Handler = (event: APIGatewayEvent, context: Context, cb: Ca
 
         cb(null, ResponseHelper.simpleMessage(500, "Something went wrong with creating your account."));
     })();
-}
+});
 
 async function hashPassword(username: string, password: string): Promise<string> {
     console.log(`${username}_${password}`);
