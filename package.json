@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@iopipe/iopipe": "^1.10.0",
     "aws-sdk": "^2.302.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.3.0",
@@ -22,6 +23,7 @@
     "add-asset-webpack-plugin": "^0.1.0",
     "serverless-offline": "^3.25.9",
     "serverless-offline-sqs": "^1.3.1",
+    "serverless-plugin-iopipe": "^1.6.2",
     "serverless-secrets-plugin": "^0.1.0",
     "serverless-webpack": "^5.1.1",
     "source-map-support": "^0.5.6",

@@ -118,3 +118,71 @@ export const handleDeletePresent: Handler = (event: DynamoDBStreamEvent, context
         }
     })();
 }
+
+export const markAsPurchased: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+    (async () => {
+        await eventStore.publish(context.awsRequestId, "mark-present-as-purchased", {"userId": event.requestContext.authorizer.principalId,
+                                                                    "targetUserId": decodeURIComponent(event.pathParameters.userId),
+                                                                    "presentId": decodeURIComponent(event.pathParameters.presentId)});
+
+        cb(null, ResponseHelper.simpleMessage(200, "Mark-As-Purchased"));
+    })();
+}
+
+export const handleMarkAsPurchased: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+    (async () => {
+        try {
+            
+            Utils.filterEventStream('mark-present-as-purchased', event, (data, sourceRecord) => {
+                presentService.markPresentAsPurchased(data.userId, data.targetUserId, data.presentId)
+                                    .then((event) => {
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-purchased', Utils.getEvent(sourceRecord).Payload);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Error");
+                                        console.error(error);
+                                        cb(error);
+                                    });
+            });
+    
+            cb(null, "Handled");
+        } catch(ex) {
+            console.error(ex);
+            cb(ex);
+        }
+    })();
+}
+
+export const unmarkAsPurchased: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
+    (async () => {
+        await eventStore.publish(context.awsRequestId, "unmark-present-as-purchased", {"userId": event.requestContext.authorizer.principalId,
+                                                                    "targetUserId": decodeURIComponent(event.pathParameters.userId),
+                                                                    "presentId": decodeURIComponent(event.pathParameters.presentId)});
+
+        cb(null, ResponseHelper.simpleMessage(200, "Unmark-As-Purchased"));
+    })();
+}
+
+export const handleUnmarkAsPurchased: Handler = (event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+    (async () => {
+        try {
+            
+            Utils.filterEventStream('unmark-present-as-purchased', event, (data, sourceRecord) => {
+                presentService.unmarkPresentAsPurchased(data.userId, data.targetUserId, data.presentId)
+                                    .then((event) => {
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-unpurchased', Utils.getEvent(sourceRecord).Payload);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Error");
+                                        console.error(error);
+                                        cb(error);
+                                    });
+            });
+    
+            cb(null, "Handled");
+        } catch(ex) {
+            console.error(ex);
+            cb(ex);
+        }
+    })();
+}

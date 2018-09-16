@@ -2,6 +2,7 @@ service:
   name: eventSourceSystem
 
 plugins:
+  - serverless-plugin-iopipe
   - serverless-webpack
   - serverless-offline
 
@@ -16,6 +17,8 @@ provider:
   runtime: nodejs8.10
   timeout: 10
   memorySize: 128
+  environment: 
+    IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
   iamRoleStatements:
     -  Effect: "Allow"
        Action:
@@ -221,6 +224,50 @@ functions:
                 presentId: true
           cors: true
           authorizer: authorizer
+  markPresentAsPurchased:
+    handler: presentHandler.markAsPurchased
+    events:
+      - http:
+          method: put
+          path: /presents/{userId}/{presentId}/purchased
+          request:
+            parameters:
+              paths:
+                userId: true
+                presentId: true
+          cors: true
+          authorizer: authorizer
+  handleMarkPresentAsPurchased:
+    handler: presentHandler.handleMarkAsPurchased
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
+  unmarkPresentAsPurchased:
+    handler: presentHandler.unmarkAsPurchased
+    events:
+      - http:
+          method: delete
+          path: /presents/{userId}/{presentId}/purchased
+          request:
+            parameters:
+              paths:
+                userId: true
+                presentId: true
+          cors: true
+          authorizer: authorizer
+  handleUnmarkPresentAsPurchased:
+    handler: presentHandler.handleUnmarkAsPurchased
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   handleDeletePresent:
     handler: presentHandler.handleDeletePresent
     events:
@@ -255,8 +302,8 @@ resources:  # CloudFormation template syntax
           - AttributeName: event_id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 2
-          WriteCapacityUnits: 2
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
         StreamSpecification:
           StreamViewType: NEW_IMAGE
     userTable:
@@ -270,8 +317,8 @@ resources:  # CloudFormation template syntax
           - AttributeName: user_name
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 2
-          WriteCapacityUnits: 2
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
     eventTopic:
       Type: "AWS::SNS::Topic"
       Properties:

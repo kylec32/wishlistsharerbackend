@@ -1,7 +1,8 @@
-import { PresentView } from "./PresentView";
-
 export interface FollowedPresentView {
-    name: string,
     id: string,
-    presents: PresentView[]
+    title: string,
+    url?: string,
+    imageUrl?: string,
+    purchased: boolean,
+    purchasedByUser: boolean
 }

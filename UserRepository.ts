@@ -13,7 +13,7 @@ export class UserRepository {
     async getUser(userName: string): Promise<User> {
         const findUserNameRequest = <GetItemInput>{
             TableName: 'userTable',
-            Key: {'user_name': userName}
+            Key: {'user_name': userName.toLowerCase()}
         };
 
         const response = await this.dynamoClient.get(findUserNameRequest).promise();

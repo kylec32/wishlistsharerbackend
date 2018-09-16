@@ -3,7 +3,6 @@ import { SQS, DynamoDB, SNS, AWSError } from 'aws-sdk';
 import { GetItemInput, ScanInput, PutItemInput } from 'aws-sdk/clients/dynamodb';
 import * as uuid from 'uuid/v1';
 import * as bcryptjs from 'bcryptjs';
-import * as p from 'typed-promisify';
 import * as jwt from 'jsonwebtoken';
 import * as fs from 'fs';
 import { Event } from './message';
@@ -127,7 +126,7 @@ export const handleSignUpEvent: Handler = (event: DynamoDBStreamEvent, context: 
             const item = <PutItemInput>{
                 TableName: "userTable",
                 Item: {
-                    user_name: newSignup.user_name,
+                    user_name: newSignup.user_name.toLowerCase(),
                     first_name: newSignup.firstName,
                     last_name: newSignup.lastName,
                     email_address: newSignup.emailAddress,
