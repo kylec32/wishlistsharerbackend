@@ -1,5 +1,5 @@
 import { APIGatewayEvent, DynamoDBStreamEvent, CustomAuthorizerEvent, CustomAuthorizerResult, PolicyDocument, Statement, DynamoDBRecord, Callback, Context, Handler, StatementAction, StatementResource } from 'aws-lambda';
-import { DynamoDB} from 'aws-sdk';
+import { DynamoDB, Response} from 'aws-sdk';
 import { GetItemInput, PutItemInput } from 'aws-sdk/clients/dynamodb';
 import * as uuid from 'uuid/v1';
 import * as bcryptjs from 'bcryptjs';
@@ -9,6 +9,8 @@ import { Event } from './message';
 import { UserRepository } from './UserRepository';
 import { EventStore } from './EventStore';
 import { ResponseHelper } from './ResponseHelper';
+import * as request from 'request';
+import { resolve } from 'dns';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const dynamoClient = new DynamoDB.DocumentClient({region: 'us-east-1'});
@@ -24,16 +26,11 @@ export const authorizer: Handler = iopipe((event: CustomAuthorizerEvent, context
   
         try {
           const decoded: any = jwt.verify(token, publicKey);
-          console.log(decoded);
           cb(null, generatePolicy(decoded.user_id, 'Allow', '*'));
         } catch(err) {
-          console.log("rejecting in first if");
-          console.log(event);
           cb(err);
         }
       } else {
-        console.log("rejecting in second if");
-        console.log(event);
         cb(null, 'Unauthorized');
       }
 });
@@ -161,6 +158,11 @@ export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context,
     
             let hashedPasswordPromise = hashPassword(parsedBody.username, parsedBody.password);
 
+            if(!await validateCaptcha(parsedBody.captcha)) {
+                cb(null, ResponseHelper.simpleMessage(403, "Incorrect CAPTCHA"));
+                return;
+            }
+
             try {
                 await userRepository.getUser(parsedBody.username)
 
@@ -189,6 +191,24 @@ export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context,
         cb(null, ResponseHelper.simpleMessage(500, "Something went wrong with creating your account."));
     })();
 });
+
+async function validateCaptcha(captcha: string): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+        request.post('https://www.google.com/recaptcha/api/siteverify',
+        {form: {
+                    secret: process.env.CAPTCHA_SECRET,
+                    response: captcha
+                }
+            }, (error: any, response: request.Response, body: any) => {
+                if(error) {
+                    reject(error);
+                }
+
+                resolve(JSON.parse(body).success)
+            })
+    });
+    
+}
 
 async function hashPassword(username: string, password: string): Promise<string> {
     console.log(`${username}_${password}`);

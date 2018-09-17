@@ -18,6 +18,8 @@ provider:
   memorySize: 128
   environment: 
     IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
+    IOPIPE_TRACE_AUTO_HTTP_ENABLED: true
+    CAPTCHA_SECRET: ${env:CAPTCHA_SECRET}
   iamRoleStatements:
     -  Effect: "Allow"
        Action:

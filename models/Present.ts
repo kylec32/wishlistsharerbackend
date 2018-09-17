@@ -3,5 +3,6 @@ export interface Present {
     title: string,
     url?: string,
     imageUrl?: string,
-    purchasedById?: string
+    purchasedById?: string,
+    addedDateTime: string
 }

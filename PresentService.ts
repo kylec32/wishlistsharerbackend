@@ -19,11 +19,9 @@ export class PresentService {
         user.presents = user.presents == null ? [] : user.presents;
 
         present.id = uuid();
+        present.addedDateTime = new Date().toISOString().toString();
 
         user.presents.push(present);
-
-        console.log("Right before update");
-        console.log(user);
 
         await this.userRepository.updateUser(user);
     }
@@ -45,9 +43,15 @@ export class PresentService {
     async getUserPresents(userId: string): Promise<PresentView[]> {
         const user = await this.userRepository.getUserById(userId);
 
-        const presents = user.presents == null ? [] : user.presents;
+        let presents = user.presents == null ? [] : user.presents;
 
-        return presents.map((present) => <PresentView>{
+        presents = presents.map(present => { 
+            present.addedDateTime = present.addedDateTime == undefined ? "": present.addedDateTime;
+            return present;
+        });
+
+        return presents.sort((present1: Present, present2: Present) => present1.addedDateTime.localeCompare(present2.addedDateTime))
+                .map((present) => <PresentView>{
             "id": present.id,
             "title": present.title,
             "url": present.url
@@ -69,7 +73,11 @@ export class PresentService {
     } 
 
     private getPresentsForFollowed(presents: Present[], currentUserId: string): FollowedPresentView[] {
-        return presents.map(present => {
+        return presents.map(present => { 
+            present.addedDateTime = present.addedDateTime == undefined ? "": present.addedDateTime;
+            return present;
+        }).sort((present1: Present, present2: Present) => present1.addedDateTime.localeCompare(present2.addedDateTime))
+        .map(present => {
             return this.populateFullFollowedPresentData(present, currentUserId);
         });
     }
