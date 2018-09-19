@@ -96,6 +96,26 @@ functions:
           method: post
           path: sign-in
           cors: true
+  forgottenPassword:
+    handler: user-management.forgottenPassword
+    events:
+      - http:
+          method: post
+          path: reset/{email}
+          cors: true
+          request:
+            parameters:
+              paths:
+                email: true
+  handleForgottenPassword:
+    handler: email-handler.handleForgottenPassword
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   followNew:
     handler: connectionHandler.addNew
     events:

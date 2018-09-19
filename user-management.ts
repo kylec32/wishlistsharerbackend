@@ -109,14 +109,6 @@ export const signIn: Handler = iopipe((event: APIGatewayEvent, context: Context,
     })();
 });
 
-function handleEvent(type: string, dbRecord: DynamoDBRecord, found: (data: any) => void): void   {
-    const event = <Event>DynamoDB.Converter.unmarshall(dbRecord.dynamodb.NewImage);
-    console.log(event);
-    if(event.Type == type) {
-        found(event.Payload);
-    }
-}
-
 export const handleSignUpEvent: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     Utils.filterEventStream("sign-up", event, (data, sourceRecord: DynamoDBRecord) => {
         (async() => {
@@ -133,6 +125,28 @@ export const handleSignUpEvent: Handler = iopipe((event: DynamoDBStreamEvent, co
     });
 
     cb(null, "Handled Sign Up");
+});
+
+export const forgottenPassword: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+    (async() => {
+        try {
+            const forgottenPasswordUser = await userRepository.getUser(event.pathParameters.email.toLowerCase());
+            const authorizedToken = jwt.sign({'id': forgottenPasswordUser.id}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 15 });
+            const forgottenPasswordEvent = {
+                'userId': forgottenPasswordUser.id,
+                'token': authorizedToken,
+                'email': forgottenPasswordUser.user_name,
+                'user': forgottenPasswordUser
+            };
+
+            eventStore.publish(context.awsRequestId, 'forgotten-password', forgottenPasswordEvent);
+
+            cb(null, ResponseHelper.simpleMessage(202, "Forgotten password request acceptted."));
+        } catch(ex) {
+            console.error(ex);
+            cb(null, ResponseHelper.simpleMessage(404, "User not found"));
+        }
+    })();
 });
 
 export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
