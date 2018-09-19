@@ -1,5 +1,5 @@
 import { DynamoDB } from 'aws-sdk';
-import { DocumentClient, GetItemInput, UpdateItemInput, QueryInput, ScanInput } from 'aws-sdk/clients/dynamodb';
+import { DocumentClient, GetItemInput, UpdateItemInput, PutItemInput, ScanInput } from 'aws-sdk/clients/dynamodb';
 import { User } from './models/User';
 
 export class UserRepository {
@@ -99,5 +99,20 @@ export class UserRepository {
             console.error(ex);
         }
         
+    }
+
+    async createUser(firstName: string, lastName: string, email: string, password: string, id: string) {
+        const item = <PutItemInput>{
+            TableName: "userTable",
+            Item: {
+                user_name: email.toLowerCase(),
+                first_name: firstName,
+                last_name: lastName,
+                password: password,
+                id: id
+            }
+        };
+
+        return this.dynamoClient.put(item).promise();
     }
 }

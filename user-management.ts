@@ -10,7 +10,7 @@ import { UserRepository } from './UserRepository';
 import { EventStore } from './EventStore';
 import { ResponseHelper } from './ResponseHelper';
 import * as request from 'request';
-import { resolve } from 'dns';
+import { Utils } from './Utils';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const dynamoClient = new DynamoDB.DocumentClient({region: 'us-east-1'});
@@ -118,33 +118,18 @@ function handleEvent(type: string, dbRecord: DynamoDBRecord, found: (data: any) 
 }
 
 export const handleSignUpEvent: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
-    event.Records.forEach(record => {
-        handleEvent("sign-up", record, (newSignup: any) => {
-            console.log(record);
-            const item = <PutItemInput>{
-                TableName: "userTable",
-                Item: {
-                    user_name: newSignup.user_name.toLowerCase(),
-                    first_name: newSignup.firstName,
-                    last_name: newSignup.lastName,
-                    email_address: newSignup.emailAddress,
-                    password: newSignup.password,
-                    id: uuid()
-                }
-              };
-          
-              dynamoClient.put(item, (error, output) => {
-                if(error) {
-                    console.log("Error:");
-                    console.error(error);
-                }
-          
-                console.log("Success:");
-                console.log(output);
-              });
-              console.log("NewSignup:");
-            console.log(newSignup);
-        });
+    Utils.filterEventStream("sign-up", event, (data, sourceRecord: DynamoDBRecord) => {
+        (async() => {
+            await userRepository.createUser(data.firstName,
+                data.lastName,
+                data.user_name.toLowerCase(),
+                data.password, uuid());
+
+            await eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId,
+                                    "signed-up",
+                                    data);
+        })()
+
     });
 
     cb(null, "Handled Sign Up");

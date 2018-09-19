@@ -20,6 +20,7 @@ provider:
     IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
     IOPIPE_TRACE_AUTO_HTTP_ENABLED: true
     CAPTCHA_SECRET: ${env:CAPTCHA_SECRET}
+    MAILGUN_API_KEY: ${env:MAILGUN_API_KEY}
   iamRoleStatements:
     -  Effect: "Allow"
        Action:
@@ -79,6 +80,15 @@ functions:
           method: post
           path: sign-up
           cors: true
+  handleSignUpEmail:
+    handler: email-handler.handleNewUser
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   signIn:
     handler: user-management.signIn
     events:
