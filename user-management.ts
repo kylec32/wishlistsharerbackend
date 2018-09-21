@@ -131,7 +131,7 @@ export const forgottenPassword: Handler = iopipe((event: APIGatewayEvent, contex
     (async() => {
         try {
             const forgottenPasswordUser = await userRepository.getUser(event.pathParameters.email.toLowerCase());
-            const authorizedToken = jwt.sign({'id': forgottenPasswordUser.id}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 15 });
+            const authorizedToken = jwt.sign({'id': forgottenPasswordUser.id, 'userName': forgottenPasswordUser.email_address}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 15 });
             const forgottenPasswordEvent = {
                 'userId': forgottenPasswordUser.id,
                 'token': authorizedToken,
@@ -146,6 +146,47 @@ export const forgottenPassword: Handler = iopipe((event: APIGatewayEvent, contex
             console.error(ex);
             cb(null, ResponseHelper.simpleMessage(404, "User not found"));
         }
+    })();
+});
+
+export const resetPassword: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+    (async() => {
+        try {
+            const body = JSON.parse(event.body);
+            const decoded = jwt.verify(body.token, publicKey);
+
+            const resetPasswordEvent = {
+                "targetUserId": decoded['id'],
+                "newPassword": await hashPassword(decoded['userName'], body.password)
+            }
+
+            eventStore.publish(context.awsRequestId, 'reset-password', resetPasswordEvent);
+
+            cb(null, ResponseHelper.simpleMessage(202, "Password-Resetting"));
+
+        } catch(ex) {
+            cb(null, ResponseHelper.simpleMessage(403, "Incorrect token"))
+        }
+    })();
+});
+
+export const handleResetPassword: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+    (async() => {
+        Utils.filterEventStream('reset-password', event, (data, sourceRecord) => {
+            try {
+                userRepository.updatePassword(data.targetUserId, data.newPassword)
+                    .then(value => eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'password-reset', value))
+                    .catch(err => {
+                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'password-unsuccessfully-reset', {})
+                        console.error("Error:");
+                        console.error(err);
+                    })
+            } catch(ex) {
+                console.error("Error:");
+                console.error(ex);
+            }
+        });
+        cb(null, "Handled");
     })();
 });
 

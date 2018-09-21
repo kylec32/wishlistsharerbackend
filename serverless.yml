@@ -116,6 +116,22 @@ functions:
             Fn::GetAtt:
               - eventsTable
               - StreamArn
+  resetPassword:
+    handler: user-management.resetPassword
+    events:
+      - http:
+          method: post
+          path: /reset
+          cors: true
+  handleResetPassword:
+    handler: user-management.handleResetPassword
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   followNew:
     handler: connectionHandler.addNew
     events:

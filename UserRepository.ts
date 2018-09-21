@@ -101,6 +101,13 @@ export class UserRepository {
         
     }
 
+    async updatePassword(userId: string, newPassword: string): Promise<User> {
+        const user = await this.getUserById(userId);
+        user.password = newPassword;
+        await this.updateUser(user);
+        return user;
+    }
+
     async createUser(firstName: string, lastName: string, email: string, password: string, id: string) {
         const item = <PutItemInput>{
             TableName: "userTable",
