@@ -54,8 +54,30 @@ export const update: Handler = iopipe((event: APIGatewayEvent, context: Context,
 export const handleUpdate: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
-            
             Utils.filterEventStream('update-present', event, (data, sourceRecord) => {
+                presentService.updatePresent(data.userId, data.presentId, JSON.parse(data.present))
+                                    .then((event) => {
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-updated', Utils.getEvent(sourceRecord).Payload);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Error");
+                                        console.error(error);
+                                    });
+            });
+    
+            cb(null, "Handled");
+        } catch(ex) {
+            console.error(ex);
+            cb(ex);
+        }
+    })();
+});
+
+export const notifyPurchaserOfPresentChange: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+    (async () => {
+        try {
+            
+            Utils.filterEventStream('present-updated', event, (data, sourceRecord) => {
                 presentService.updatePresent(data.userId, data.presentId, JSON.parse(data.present))
                                     .then((event) => {
                                         eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-updated', Utils.getEvent(sourceRecord).Payload);

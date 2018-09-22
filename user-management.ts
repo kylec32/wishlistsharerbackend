@@ -19,7 +19,8 @@ const userRepository = new UserRepository();
 const privateKey = fs.readFileSync('./keys/private.key');
 const publicKey = fs.readFileSync('./keys/public.key');
 
-export const authorizer: Handler = iopipe((event: CustomAuthorizerEvent, context: Context, cb: Callback) => {
+export const authorizer: Handler = iopipe((event: CustomAuthorizerEvent, context: Context, cb: any) => {
+
     if (event.authorizationToken) {
         // remove "bearer " from token
         const token = event.authorizationToken.substring(7);
@@ -28,11 +29,13 @@ export const authorizer: Handler = iopipe((event: CustomAuthorizerEvent, context
           const decoded: any = jwt.verify(token, publicKey);
           cb(null, generatePolicy(decoded.user_id, 'Allow', '*'));
         } catch(err) {
-          cb(err);
+            console.error(err);
+            cb("Unauthorized");
+            return;
         }
-      } else {
-        cb(null, 'Unauthorized');
-      }
+    } else {
+        cb("Unauthorized");
+    }
 });
 
 function generatePolicy(principalId, effect, resource): CustomAuthorizerResult {

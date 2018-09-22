@@ -41,6 +41,7 @@ export class UserRepository {
         }
 
         response.Items.map((item) => item.followingUserIds = item.following_user_ids );
+        response.Items.map((item) => item.presents = item.presents == undefined ? [] : item.presents);
 
         return <User>response.Items[0];
     }
