@@ -58,7 +58,7 @@ export const signIn: Handler = iopipe((event: APIGatewayEvent, context: Context,
         try {
             const user = await userRepository.getUser(body.emailAddress);
 
-            if(await bcryptjs.compare(`${body.emailAddress}_${body.password}`, user.password)) {
+            if(await bcryptjs.compare(`${body.emailAddress.toLowerCase()}_${body.password}`, user.password)) {
                 eventStore.publish(context.awsRequestId, 'login-succeeded', {"userName": body.emailAddress});
                
                const token = jwt.sign({'user_id': user.id,}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 60 * 8 });
@@ -169,7 +169,7 @@ export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context,
         try {
             const parsedBody = JSON.parse(event.body);
     
-            let hashedPasswordPromise = hashPassword(parsedBody.username, parsedBody.password);
+            let hashedPasswordPromise = hashPassword(parsedBody.username.toLowerCase(), parsedBody.password);
 
             if(!await validateCaptcha(parsedBody.captcha)) {
                 cb(null, ResponseHelper.simpleMessage(403, "Incorrect CAPTCHA"));

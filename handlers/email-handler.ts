@@ -35,9 +35,8 @@ export const handleNewUser: Handler = iopipe((event: DynamoDBStreamEvent, contex
 export const handleForgottenPassword: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
-            
             Utils.filterEventStream('forgotten-password', event, (data, sourceRecord) => {
-                const resetUrl = `http://localhost:4200/reset/${data.email}/${data.token}`;
+                const resetUrl = `https://wishlistsharer.tk/reset/${data.email}/${data.token}`;
                 emailService.sendHtmlMessage(data.email,
                                             "Forgotten Password: WishListSharer.tk",
                                             `A request for a password reset has been made for your account. If you did not make this request there is no action to be taken.<br/><br/>If you did request this reset please follow this link: <a href="${resetUrl}">${resetUrl}</a><br/><br/>This link will expire in 15 minutes.`)

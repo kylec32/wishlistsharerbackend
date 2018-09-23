@@ -1,0 +1,23 @@
+#.travis.yml
+
+language: node_js
+node_js:
+  - "8.9"
+
+branches:
+  only:
+    - master
+
+before_script:
+  - npm install
+
+script:
+  - echo 'hello'
+
+after_success:
+  - sls deploy
+
+notifications:
+  email:
+    on_failure: kylec32@gmail.com
+    on_success: kylec32@gmail.com

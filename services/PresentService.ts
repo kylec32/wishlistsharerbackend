@@ -20,6 +20,7 @@ export class PresentService {
 
         present.id = uuid();
         present.addedDateTime = new Date().toISOString().toString();
+        present.url = this.normalizeLink(present.url);
 
         user.presents.push(present);
 
@@ -32,9 +33,19 @@ export class PresentService {
         const presentIndex = user.presents.findIndex((present) => present.id == presentId);
 
         user.presents[presentIndex].title = present.title;
-        user.presents[presentIndex].url = present.url;
+        user.presents[presentIndex].url = this.normalizeLink(present.url);
 
         await this.userRepository.updateUser(user);
+    }
+
+    private normalizeLink(link: string) {
+        if(link == undefined) {
+            return link;
+        } else if (link.startsWith('http')) {
+            return link;
+        } else {
+            return `https://${link}`;
+        }
     }
 
     async getUserPresents(userId: string): Promise<PresentView[]> {
