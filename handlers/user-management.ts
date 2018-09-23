@@ -1,6 +1,4 @@
-import { APIGatewayEvent, DynamoDBStreamEvent, CustomAuthorizerEvent, CustomAuthorizerResult, PolicyDocument, Statement, DynamoDBRecord, Callback, Context, Handler, StatementAction, StatementResource } from 'aws-lambda';
-import { DynamoDB } from 'aws-sdk';
-import { GetItemInput } from 'aws-sdk/clients/dynamodb';
+import { APIGatewayEvent, DynamoDBStreamEvent, CustomAuthorizerEvent, CustomAuthorizerResult, PolicyDocument, Statement, DynamoDBRecord, Callback, Context, Handler} from 'aws-lambda';
 import * as uuid from 'uuid/v1';
 import * as bcryptjs from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
@@ -106,7 +104,7 @@ export const forgottenPassword: Handler = iopipe((event: APIGatewayEvent, contex
     (async() => {
         try {
             const forgottenPasswordUser = await userRepository.getUser(event.pathParameters.email.toLowerCase());
-            const authorizedToken = jwt.sign({'id': forgottenPasswordUser.id, 'userName': forgottenPasswordUser.email_address}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 15 });
+            const authorizedToken = jwt.sign({'id': forgottenPasswordUser.id, 'userName': forgottenPasswordUser.user_name}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 15 });
             const forgottenPasswordEvent = {
                 'userId': forgottenPasswordUser.id,
                 'token': authorizedToken,

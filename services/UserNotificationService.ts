@@ -55,13 +55,13 @@ export class UserNotificationService {
     }
 
     async notifyFollowersOfNewPresent(listUserId: string, newPresent: Present) {
-        const user = await this.userRepository.getUserById(listUserId);
+        const listUser = await this.userRepository.getUserById(listUserId);
         const users = await this.userRepository.usersThatFollowUserId(listUserId);
         
         users.forEach(user => {
             this.emailService.sendHtmlMessage(user.user_name, "New Wish List Item for Person you Follow",
             `
-            ${user.first_name} ${user.last_name} just added a new gift to their list!
+            ${listUser.first_name} ${listUser.last_name} just added a new gift to their list!
             <br/>
             <br/>
             New Item: <a href="${newPresent.url}">${newPresent.title}</a>

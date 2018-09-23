@@ -97,11 +97,10 @@ export class UserRepository {
             const updateRequest = <UpdateItemInput>{
                 TableName: 'userTable',
                 Key: {'user_name': user.user_name},
-                UpdateExpression: "set first_name = :firstName, last_name = :lastName, email_address = :emailAddress, password = :password, following_user_ids = :followingUserIds, presents = :presents",
+                UpdateExpression: "set first_name = :firstName, last_name = :lastName, password = :password, following_user_ids = :followingUserIds, presents = :presents",
                 ExpressionAttributeValues:{
                     ":firstName": user.first_name,
                     ":lastName": user.last_name,
-                    ":emailAddress": user.email_address,
                     ":password": user.password,
                     ":followingUserIds": user.followingUserIds == undefined ? [] : user.followingUserIds,
                     ":presents": user.presents == undefined ? [] : user.presents
