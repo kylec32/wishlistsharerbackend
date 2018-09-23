@@ -1,9 +1,9 @@
 import { UserRepository } from "./UserRepository";
-import { Present } from "./models/Present";
-import { PresentView } from "./models/PresentView"; 
+import { Present } from "../models/Present";
+import { PresentView } from "../models/PresentView"; 
 import * as uuid from 'uuid/v1';
-import { FollowedPresentsView } from "./models/FollowedPresentsView";
-import { FollowedPresentView } from "./models/FollowedPresentView";
+import { FollowedPresentsView } from "../models/FollowedPresentsView";
+import { FollowedPresentView } from "../models/FollowedPresentView";
 
 export class PresentService {
 
@@ -29,13 +29,10 @@ export class PresentService {
     async updatePresent(userId: string, presentId: string, present: Present): Promise<any> {
         const user = await this.userRepository.getUserById(userId);
 
-        user.presents = user.presents == null ? [] : user.presents;
+        const presentIndex = user.presents.findIndex((present) => present.id == presentId);
 
-        user.presents = user.presents.filter((present) => present.id != presentId);
-
-        present.id = presentId;
-
-        user.presents.push(present);
+        user.presents[presentIndex].title = present.title;
+        user.presents[presentIndex].url = present.url;
 
         await this.userRepository.updateUser(user);
     }
@@ -93,14 +90,17 @@ export class PresentService {
         }
     }
 
-    async deletePresent(userId: string, presentId: string): Promise<any> {
+    async deletePresent(userId: string, presentId: string): Promise<Present> {
         const user = await this.userRepository.getUserById(userId);
 
         user.presents = user.presents == null ? [] : user.presents;
 
+        const deletedPresent = user.presents[user.presents.findIndex(present => present.id == presentId)];
         user.presents = user.presents.filter((present) => present.id != presentId);
 
         await this.userRepository.updateUser(user);
+
+        return deletedPresent;
     }
 
     async markPresentAsPurchased(userId: string, targetUserId: string, presentId: string): Promise<any> {
@@ -156,5 +156,7 @@ export class PresentService {
 
         this.userRepository.updateUser(user);
     }
+
+    
 
 }

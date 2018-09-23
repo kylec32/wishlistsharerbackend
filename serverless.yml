@@ -21,6 +21,8 @@ provider:
     IOPIPE_TRACE_AUTO_HTTP_ENABLED: true
     CAPTCHA_SECRET: ${env:CAPTCHA_SECRET}
     MAILGUN_API_KEY: ${env:MAILGUN_API_KEY}
+    AWS_REGION: ${opt:region, 'us-east-1'}
+    AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
   iamRoleStatements:
     -  Effect: "Allow"
        Action:
@@ -50,18 +52,13 @@ provider:
             - ":"
             - Ref: "AWS::AccountId"
             - ":eventsTopic"
-    - Effect: "Allow"
-      Action:
-        - "lambda:InvokeFunction"
-      Resource:
-        - arn:aws:lambda:us-east-1:927245588110:function:eventSourceSystem-dev-handleConnectUsers2
 
 
 functions:
   authorizer:
-    handler: user-management.authorizer
+    handler: handlers/user-management.authorizer
   presistEvent:
-    handler: eventHandler.persistEvent
+    handler: handlers/eventHandler.persistEvent
     events:
       - sns:
           arn:
@@ -74,14 +71,14 @@ functions:
                 - ":eventsTopic"
           topicName: eventsTopic
   signUp:
-    handler: user-management.signUp
+    handler: handlers/user-management.signUp
     events:
       - http:
           method: post
           path: sign-up
           cors: true
   handleSignUpEmail:
-    handler: email-handler.handleNewUser
+    handler: handlers/email-handler.handleNewUser
     events:
       - stream:
           type: dynamodb
@@ -90,14 +87,14 @@ functions:
               - eventsTable
               - StreamArn
   signIn:
-    handler: user-management.signIn
+    handler: handlers/user-management.signIn
     events:
       - http:
           method: post
           path: sign-in
           cors: true
   forgottenPassword:
-    handler: user-management.forgottenPassword
+    handler: handlers/user-management.forgottenPassword
     events:
       - http:
           method: post
@@ -108,7 +105,7 @@ functions:
               paths:
                 email: true
   handleForgottenPassword:
-    handler: email-handler.handleForgottenPassword
+    handler: handlers/email-handler.handleForgottenPassword
     events:
       - stream:
           type: dynamodb
@@ -117,14 +114,14 @@ functions:
               - eventsTable
               - StreamArn
   resetPassword:
-    handler: user-management.resetPassword
+    handler: handlers/user-management.resetPassword
     events:
       - http:
           method: post
           path: /reset
           cors: true
   handleResetPassword:
-    handler: user-management.handleResetPassword
+    handler: handlers/user-management.handleResetPassword
     events:
       - stream:
           type: dynamodb
@@ -133,7 +130,7 @@ functions:
               - eventsTable
               - StreamArn
   followNew:
-    handler: connectionHandler.addNew
+    handler: handlers/connectionHandler.addNew
     events:
       - http:
           method: post
@@ -145,7 +142,7 @@ functions:
           cors: true
           authorizer: authorizer
   handleConnectUsers:
-    handler: connectionHandler.handleConnectUsers
+    handler: handlers/connectionHandler.handleConnectUsers
     events:
       - stream:
           type: dynamodb
@@ -153,21 +150,15 @@ functions:
             Fn::GetAtt:
               - eventsTable
               - StreamArn
-  handleConnectUsers2:
-    handler: connectionHandler.handleConnectUsers2
-    events:
-      - stream:
-          type: dynamodb
-          arn: arn:aws:dynamodb:us-east-1:927245588110:table/eventsTable/stream/2018-08-31T02:59:58.354
   eventProcess:
-    handler: EventProcessor.verify
+    handler: services/EventProcessor.verify
     events:
       - http:
           method: post
           path: /event-processor
           cors: true
   getFollowers:
-    handler: connectionHandler.getConnections
+    handler: handlers/connectionHandler.getConnections
     events:
       - http:
           method: get
@@ -175,7 +166,7 @@ functions:
           cors: true
           authorizer: authorizer
   deleteConnection:
-    handler: connectionHandler.deleteConnection
+    handler: handlers/connectionHandler.deleteConnection
     events:
       - http:
           method: delete
@@ -187,7 +178,7 @@ functions:
           cors: true
           authorizer: authorizer
   handleDisconnectUser:
-    handler: connectionHandler.handleDisconnectUser
+    handler: handlers/connectionHandler.handleDisconnectUser
     events:
       - stream:
           type: dynamodb
@@ -196,13 +187,13 @@ functions:
               - eventsTable
               - StreamArn
   verify:
-    handler: user-management.verify
+    handler: handlers/user-management.verify
     events:
       - http:
           method: post
           path: verify
   handleSignUpEvent:
-    handler: user-management.handleSignUpEvent
+    handler: handlers/user-management.handleSignUpEvent
     events:
       - stream:
           type: dynamodb
@@ -211,15 +202,25 @@ functions:
               - eventsTable
               - StreamArn
   addPresent:
-    handler: presentHandler.addNew
+    handler: handlers/presentHandler.addNew
     events:
       - http:
           method: post
           path: /my/presents
           cors: true
           authorizer: authorizer
+  handlePresentNotifications:
+    handler: handlers/presentHandler.handlePresentNotifications
+    timeout: 30
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - eventsTable
+              - StreamArn
   handleAddPresent:
-    handler: presentHandler.handleAddNew
+    handler: handlers/presentHandler.handleAddNew
     events:
       - stream:
           type: dynamodb
@@ -228,7 +229,7 @@ functions:
               - eventsTable
               - StreamArn
   getUserPresents:
-    handler: presentHandler.getUserPresents
+    handler: handlers/presentHandler.getUserPresents
     events:
       - http:
           method: get
@@ -236,7 +237,7 @@ functions:
           cors: true
           authorizer: authorizer
   updatePresent:
-    handler: presentHandler.update
+    handler: handlers/presentHandler.update
     events:
       - http:
           method: put
@@ -248,7 +249,7 @@ functions:
           cors: true
           authorizer: authorizer
   handleUpdatePresent:
-    handler: presentHandler.handleUpdate
+    handler: handlers/presentHandler.handleUpdate
     events:
       - stream:
           type: dynamodb
@@ -257,7 +258,7 @@ functions:
               - eventsTable
               - StreamArn
   deletePresent:
-    handler: presentHandler.deletePresent
+    handler: handlers/presentHandler.deletePresent
     events:
       - http:
           method: delete
@@ -269,7 +270,7 @@ functions:
           cors: true
           authorizer: authorizer
   markPresentAsPurchased:
-    handler: presentHandler.markAsPurchased
+    handler: handlers/presentHandler.markAsPurchased
     events:
       - http:
           method: put
@@ -282,7 +283,7 @@ functions:
           cors: true
           authorizer: authorizer
   handleMarkPresentAsPurchased:
-    handler: presentHandler.handleMarkAsPurchased
+    handler: handlers/presentHandler.handleMarkAsPurchased
     events:
       - stream:
           type: dynamodb
@@ -291,7 +292,7 @@ functions:
               - eventsTable
               - StreamArn
   unmarkPresentAsPurchased:
-    handler: presentHandler.unmarkAsPurchased
+    handler: handlers/presentHandler.unmarkAsPurchased
     events:
       - http:
           method: delete
@@ -304,7 +305,7 @@ functions:
           cors: true
           authorizer: authorizer
   handleUnmarkPresentAsPurchased:
-    handler: presentHandler.handleUnmarkAsPurchased
+    handler: handlers/presentHandler.handleUnmarkAsPurchased
     events:
       - stream:
           type: dynamodb
@@ -313,7 +314,7 @@ functions:
               - eventsTable
               - StreamArn
   handleDeletePresent:
-    handler: presentHandler.handleDeletePresent
+    handler: handlers/presentHandler.handleDeletePresent
     events:
       - stream:
           type: dynamodb
@@ -322,7 +323,7 @@ functions:
               - eventsTable
               - StreamArn
   getFollowedPresents:
-    handler: followedPresentHandler.getPresents
+    handler: handlers/followedPresentHandler.getPresents
     events:
       - http:
           method: get
@@ -361,7 +362,7 @@ resources:  # CloudFormation template syntax
           - AttributeName: event_id
             KeyType: HASH
         ProvisionedThroughput:
-          ReadCapacityUnits: 5
+          ReadCapacityUnits: 10
           WriteCapacityUnits: 5
         StreamSpecification:
           StreamViewType: NEW_IMAGE

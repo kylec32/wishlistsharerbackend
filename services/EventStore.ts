@@ -5,7 +5,7 @@ export class EventStore {
     private sns: SNS;
 
     constructor() {
-        this.sns = new SNS({region: 'us-east-1'});
+        this.sns = new SNS({region: process.env.AWS_REGION});
     }
 
     async publish(correlationId: string, type: string, payload: any) {
@@ -18,7 +18,7 @@ export class EventStore {
 
         const params = <PublishInput>{
             Message: JSON.stringify(event),
-            TopicArn: 'arn:aws:sns:us-east-1:927245588110:eventsTopic'
+            TopicArn: `arn:aws:sns:${process.env.AWS_REGION}:${process.env.AWS_ACCOUNT_ID}:eventsTopic`
         }
 
         try {

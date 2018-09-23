@@ -1,10 +1,10 @@
 import { SNSEvent, SNSEventRecord, Callback, Context, Handler } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { PutItemInput } from 'aws-sdk/clients/dynamodb';
-import { Event } from './message';
+import { Event } from '../models/Event';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
-const client = new DynamoDB.DocumentClient({region: 'us-east-1'});
+const client = new DynamoDB.DocumentClient({region: process.env.AWS_REGION});
 
 export const persistEvent: Handler = iopipe((event: SNSEvent, context: Context, cb: Callback) => {
 
@@ -29,7 +29,6 @@ export const persistEvent: Handler = iopipe((event: SNSEvent, context: Context, 
         cb(error);
       }
 
-      console.log(output);
       cb(null, "Persisted");
     });
   })

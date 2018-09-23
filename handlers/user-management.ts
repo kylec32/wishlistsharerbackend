@@ -1,19 +1,17 @@
 import { APIGatewayEvent, DynamoDBStreamEvent, CustomAuthorizerEvent, CustomAuthorizerResult, PolicyDocument, Statement, DynamoDBRecord, Callback, Context, Handler, StatementAction, StatementResource } from 'aws-lambda';
-import { DynamoDB, Response} from 'aws-sdk';
-import { GetItemInput, PutItemInput } from 'aws-sdk/clients/dynamodb';
+import { DynamoDB } from 'aws-sdk';
+import { GetItemInput } from 'aws-sdk/clients/dynamodb';
 import * as uuid from 'uuid/v1';
 import * as bcryptjs from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import * as fs from 'fs';
-import { Event } from './message';
-import { UserRepository } from './UserRepository';
-import { EventStore } from './EventStore';
-import { ResponseHelper } from './ResponseHelper';
+import { UserRepository } from '../services/UserRepository';
+import { EventStore } from '../services/EventStore';
+import { ResponseHelper } from '../utils/ResponseHelper';
 import * as request from 'request';
-import { Utils } from './Utils';
+import { Utils } from '../utils/Utils';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
-const dynamoClient = new DynamoDB.DocumentClient({region: 'us-east-1'});
 const eventStore = new EventStore();
 const userRepository = new UserRepository();
 const privateKey = fs.readFileSync('./keys/private.key');
@@ -55,32 +53,6 @@ function generatePolicy(principalId, effect, resource): CustomAuthorizerResult {
     }
     return authResponse;
 };
-
-export const verify: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
-    const params = <GetItemInput>{
-        TableName: 'userTable',
-        Key: {'user_name': 1535432690997}
-    }; 
-
-    dynamoClient.get(params, (error, result) => {
-            // handle potential errors
-            if (error) {
-            console.error(error);
-            cb(null, {
-                statusCode: error.statusCode || 501,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'Couldn\'t fetch the todo item.',
-            });
-            return;
-        }
-
-        cb(null, {
-            statusCode: 200,
-            headers: { 'Content-Type': 'text/plain' },
-            body: 'Looks good',
-        });
-    });
-});
 
 export const signIn: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     const body = JSON.parse(event.body);

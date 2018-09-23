@@ -1,12 +1,14 @@
 import { APIGatewayEvent, DynamoDBStreamEvent, Callback, Context, Handler } from 'aws-lambda';
-import { EventStore } from './EventStore';
-import { ResponseHelper } from './ResponseHelper';
-import { Utils } from './Utils';
-import { PresentService } from './PresentService';
+import { EventStore } from '../services/EventStore';
+import { ResponseHelper } from '../utils/ResponseHelper';
+import { Utils } from '../utils/Utils';
+import { PresentService } from '../services/PresentService';
+import { UserNotificationService } from '../services/UserNotificationService';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const eventStore = new EventStore();
 const presentService = new PresentService();
+const userNotificationService = new UserNotificationService();
 
 export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
@@ -29,7 +31,50 @@ export const handleAddNew: Handler = iopipe((event: DynamoDBStreamEvent, context
                                     .catch((error) => {
                                         console.log("Error");
                                         console.error(error);
-                                        cb(error);
+                                    });
+            });
+    
+            cb(null, "Handled");
+        } catch(ex) {
+            console.error(ex);
+            cb(ex);
+        }
+    })();
+});
+
+export const handlePresentNotifications: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+    (async () => {
+        try {
+            Utils.filterEventStream('present-added', event, (data, sourceRecord) => {
+                userNotificationService.notifyFollowersOfNewPresent(data.userId, JSON.parse(data.present))
+                                    .then((event) => {
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-added-notification-sent', Utils.getEvent(sourceRecord).Payload);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Error");
+                                        console.error(error);
+                                    });
+            });
+
+            Utils.filterEventStream('present-updated', event, (data, sourceRecord) => {
+                userNotificationService.notifyPurchaserOfChange(data.userId, data.presentId, JSON.parse(data.present))
+                                    .then((event) => {
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'handled-present-update-notification', Utils.getEvent(sourceRecord).Payload);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Error");
+                                        console.error(error);
+                                    });
+            });
+
+            Utils.filterEventStream('present-deleted', event, (data, sourceRecord) => {
+                userNotificationService.notifyPurchaserOfDelete(data.userId, data.present)
+                                    .then((event) => {
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-deleted-notification-sent', Utils.getEvent(sourceRecord).Payload);
+                                    })
+                                    .catch((error) => {
+                                        console.log("Error");
+                                        console.error(error);
                                     });
             });
     
@@ -73,30 +118,6 @@ export const handleUpdate: Handler = iopipe((event: DynamoDBStreamEvent, context
     })();
 });
 
-export const notifyPurchaserOfPresentChange: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
-    (async () => {
-        try {
-            
-            Utils.filterEventStream('present-updated', event, (data, sourceRecord) => {
-                presentService.updatePresent(data.userId, data.presentId, JSON.parse(data.present))
-                                    .then((event) => {
-                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-updated', Utils.getEvent(sourceRecord).Payload);
-                                    })
-                                    .catch((error) => {
-                                        console.log("Error");
-                                        console.error(error);
-                                        cb(error);
-                                    });
-            });
-    
-            cb(null, "Handled");
-        } catch(ex) {
-            console.error(ex);
-            cb(ex);
-        }
-    })();
-});
-
 export const getUserPresents: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
@@ -125,12 +146,13 @@ export const handleDeletePresent: Handler = iopipe((event: DynamoDBStreamEvent, 
             Utils.filterEventStream('delete-present', event, (data, sourceRecord) => {
                 presentService.deletePresent(data.userId, data.presentId)
                                     .then((event) => {
-                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-deleted', Utils.getEvent(sourceRecord).Payload);
+                                        eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-deleted',
+                                                            {'userId': Utils.getEvent(sourceRecord).Payload.userId,
+                                                            'present': event});
                                     })
                                     .catch((error) => {
                                         console.log("Error");
                                         console.error(error);
-                                        cb(error);
                                     });
             });
     

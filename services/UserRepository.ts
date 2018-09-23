@@ -1,13 +1,13 @@
 import { DynamoDB } from 'aws-sdk';
 import { DocumentClient, GetItemInput, UpdateItemInput, PutItemInput, ScanInput } from 'aws-sdk/clients/dynamodb';
-import { User } from './models/User';
+import { User } from '../models/User';
 
 export class UserRepository {
 
     private dynamoClient: DocumentClient
 
     constructor() {
-        this.dynamoClient = new DynamoDB.DocumentClient({region: 'us-east-1'});
+        this.dynamoClient = new DynamoDB.DocumentClient({region: process.env.AWS_REGION});
     }
 
     async getUser(userName: string): Promise<User> {
@@ -40,10 +40,12 @@ export class UserRepository {
             throw new Error("No user found");
         }
 
-        response.Items.map((item) => item.followingUserIds = item.following_user_ids );
-        response.Items.map((item) => item.presents = item.presents == undefined ? [] : item.presents);
+        let user: User = <User>response.Items[0];
 
-        return <User>response.Items[0];
+        user.followingUserIds = response.Items[0].following_user_ids;
+        user.presents = user.presents == undefined ? [] : user.presents;
+
+        return user;
     }
 
     async getUserByIds(userIds: string[]): Promise<User[]> {
@@ -56,6 +58,20 @@ export class UserRepository {
         };
 
         const response = await this.dynamoClient.scan(findUsersByIds).promise();
+
+        return <User[]>response.Items;
+    }
+
+    async usersThatFollowUserId(userId: string): Promise<User[]> {
+        const findFollowers = <ScanInput>{
+            TableName: 'userTable',
+            FilterExpression: "contains(following_user_ids, :id)",
+            ExpressionAttributeValues: {
+                ":id": userId
+            }
+        };
+
+        const response = await this.dynamoClient.scan(findFollowers).promise();
 
         return <User[]>response.Items;
     }
@@ -117,7 +133,9 @@ export class UserRepository {
                 first_name: firstName,
                 last_name: lastName,
                 password: password,
-                id: id
+                id: id,
+                following_user_ids: [],
+                presents: []
             }
         };
 

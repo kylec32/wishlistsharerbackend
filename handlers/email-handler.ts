@@ -1,7 +1,7 @@
 import { DynamoDBStreamEvent, Callback, Context, Handler, APIGatewayEvent } from 'aws-lambda';
-import { Utils } from './Utils';
-import { EmailService } from './EmailService';
-import { EventStore } from './EventStore';
+import { Utils } from '../utils/Utils';
+import { EmailService } from '../services/EmailService';
+import { EventStore } from '../services/EventStore';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 

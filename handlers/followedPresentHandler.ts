@@ -1,8 +1,6 @@
 import { APIGatewayEvent, DynamoDBStreamEvent, Callback, Context, Handler } from 'aws-lambda';
-import { EventStore } from './EventStore';
-import { ResponseHelper } from './ResponseHelper';
-import { Utils } from './Utils';
-import { PresentService } from './PresentService';
+import { ResponseHelper } from '../utils/ResponseHelper';
+import { PresentService } from '../services/PresentService';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const presentService = new PresentService();

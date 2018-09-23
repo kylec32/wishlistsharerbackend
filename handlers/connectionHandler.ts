@@ -1,9 +1,9 @@
 import { APIGatewayEvent, DynamoDBStreamEvent, DynamoDBRecord, Callback, Context, Handler } from 'aws-lambda';
-import { UserRepository } from './UserRepository';
-import { ResponseHelper } from './ResponseHelper';
-import { ConnectionService } from './ConnectionService';
-import { EventStore } from './EventStore';
-import { Utils } from './Utils';
+import { UserRepository } from '../services/UserRepository';
+import { ResponseHelper } from '../utils/ResponseHelper';
+import { ConnectionService } from '../services/ConnectionService';
+import { EventStore } from '../services/EventStore';
+import { Utils } from '../utils/Utils';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
 const userRepository = new UserRepository();

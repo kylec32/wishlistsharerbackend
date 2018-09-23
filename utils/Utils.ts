@@ -1,4 +1,4 @@
-import { Event } from './message';
+import { Event } from '../models/Event';
 import { DynamoDB } from 'aws-sdk';
 import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 

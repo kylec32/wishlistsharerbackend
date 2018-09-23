@@ -1,22 +1,43 @@
-var jwt = require('jsonwebtoken');
-var bcrypt = require('bcryptjs');
-var dynamoDb = require('aws-sdk/clients/dynamodb');
+// var jwt = require('jsonwebtoken');
+// var bcrypt = require('bcryptjs');
+// var dynamoDb = require('aws-sdk/clients/dynamodb');
 
-var dynamoClient = new dynamoDb.DocumentClient({region: 'us-east-1'});
-//console.log(dynamoClient);
+// var dynamoClient = new dynamoDb.DocumentClient({region: 'us-east-1'});
+// //console.log(dynamoClient);
 
-const findByUserIdRequest = {
-    TableName: 'userTable',
-    FilterExpression: "contains(:ids, id)",
-    ExpressionAttributeValues: {
-        ":ids": ['d38c9b40-adea-11e8-b66f-b30a0f248a38', '760c28a0-ae5d-11e8-acb0-8b5b76763afd']
-    }
-};
+// const findByUserIdRequest = {
+//     TableName: 'userTable',
+//     FilterExpression: "contains(:ids, id)",
+//     ExpressionAttributeValues: {
+//         ":ids": ['d38c9b40-adea-11e8-b66f-b30a0f248a38', '760c28a0-ae5d-11e8-acb0-8b5b76763afd']
+//     }
+// };
 
-dynamoClient.scan(findByUserIdRequest).promise().then((item) => console.log(item))
-.catch((error) => {
-console.error(error);  
-});
+// dynamoClient.scan(findByUserIdRequest).promise().then((item) => console.log(item))
+// .catch((error) => {
+// console.error(error);  
+// });
+
+var blah = [ { addedDateTime: '2018-09-16T04:57:20.626Z',
+purchasedById: 'd38c9b40-adea-11e8-b66f-b30a0f248a38',
+id: 'fe253d20-b96c-11e8-a65e-4dbca5a03ef4',
+title: 'A new present after change',
+url: null },
+{ addedDateTime: '2018-09-16T04:57:46.046Z',
+purchasedById: null,
+id: '0d4c05e0-b96d-11e8-a65e-4dbca5a03ef4',
+title: 'This one comes after',
+url: null },
+{ title: 'My Salamaca Present - Updated and again and bbbdf',
+url: 'http://google.com',
+id: 'fe550d80-b63c-11e8-887c-bf9a24ef3a9c' },
+{ title: 'Here is another Salamaca - Hi bye',
+url: 'http://amazon.com',
+id: '1978a7e0-b640-11e8-a115-95b0f12d337f' } ];
+
+var presentId = 'fe253d20-b96c-11e8-a65e-4dbca5a03ef4';
+
+console.log(blah.filter(present => present.id == presentId));
 
 // console.log(jwt.verify(`eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE1MzU4MTIwNzB9.VvNGGuJVElfLrUzrbKeormliTiZoBxNYq1BCknkrbdR4y2d-_3FHwK_kKmDSgDrRbdx02EBc5TLzm4sic3Nc5ggdPuJb8kKnIPDjxdMA9C2iBg0FLZDpJVsowLJhXsT_FEYYiG2qgBBBlYumxCAH9jW0WYoOHgrwbNDaBDiVpds`,
 // `-----BEGIN PUBLIC KEY-----

@@ -2,9 +2,9 @@ import { APIGatewayEvent, DynamoDBStreamEvent, CustomAuthorizerEvent, CustomAuth
 import { SQS, DynamoDB, SNS, AWSError, Lambda } from 'aws-sdk';
 import { DocumentClient, GetItemInput, UpdateItemInput, QueryInput, ScanInput } from 'aws-sdk/clients/dynamodb';
 import { InvocationRequest } from 'aws-sdk/clients/lambda';
-import { ResponseHelper } from './ResponseHelper';
+import { ResponseHelper } from '../utils/ResponseHelper';
 
-const dynamoClient = new DynamoDB.DocumentClient({region: 'us-east-1'});
+const dynamoClient = new DynamoDB.DocumentClient({region: process.env.AWS_REGION});
 
 export const verify: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
 
@@ -41,7 +41,7 @@ export const verify: Handler = (event: APIGatewayEvent, context: Context, cb: Ca
         //         Payload: JSON.stringify(fakeStreamEvent)
         //     }
     
-        //     await new Lambda({region: 'us-east-1'}).invoke(request).promise();
+        //     await new Lambda({region: process.env.AWS_REGION}).invoke(request).promise();
     
         //     cb(null, ResponseHelper.simpleMessage(200, "Run"));
         // } catch(ex) {

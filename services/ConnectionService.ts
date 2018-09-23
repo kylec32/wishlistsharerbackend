@@ -1,4 +1,4 @@
-import { FollowedUser } from './models/FollowedUser';
+import { FollowedUser } from '../models/FollowedUser';
 import { UserRepository } from './UserRepository';
 
 export class ConnectionService {
@@ -27,9 +27,6 @@ export class ConnectionService {
 
     async getFollowees(sourceUserId: string): Promise<FollowedUser[]> {
         const sourceUser = await this.userRepository.getUserById(sourceUserId);
-
-        console.log("Following People");
-        console.log(sourceUser);
 
         const followedList = await this.userRepository.getUserByIds(sourceUser.followingUserIds == undefined ? [] : sourceUser.followingUserIds);
 
