@@ -35,13 +35,13 @@ export const authorizer: Handler = iopipe((event: CustomAuthorizerEvent, context
 });
 
 function generatePolicy(principalId, effect, resource): CustomAuthorizerResult {
-    const authResponse = <CustomAuthorizerResult>{};
+    const authResponse = <any>{};
     authResponse.principalId = principalId;
     if (effect && resource) {
-      const policyDocument = <PolicyDocument>{};
+      const policyDocument = <any>{};
       policyDocument.Version = '2012-10-17';
       policyDocument.Statement = [];
-      const statementOne = <Statement>{};
+      const statementOne = <any>{};
       statementOne
       statementOne.Action = 'execute-api:Invoke';
       statementOne.Effect = effect;
