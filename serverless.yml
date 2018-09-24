@@ -160,6 +160,14 @@ functions:
           path: /connections
           cors: true
           authorizer: authorizer
+  searchUsers:
+    handler: handlers/user-management.searchUsers
+    events:
+      - http:
+          method: get
+          path: /users/{name}
+          cors: true
+          authorizer: authorizer
   deleteConnection:
     handler: handlers/connectionHandler.deleteConnection
     events:

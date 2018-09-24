@@ -1,6 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
 import { DocumentClient, GetItemInput, UpdateItemInput, PutItemInput, ScanInput } from 'aws-sdk/clients/dynamodb';
 import { User } from '../models/User';
+import { UserView } from '../models/UserView';
 
 export class UserRepository {
 
@@ -139,5 +140,25 @@ export class UserRepository {
         };
 
         return this.dynamoClient.put(item).promise();
+    }
+
+    async searchUsers(name: string):Promise<UserView[]> {
+        const search = <ScanInput>{
+            TableName: 'userTable'
+        }
+
+        const allUsers = await this.dynamoClient.scan(search).promise();
+
+        return <UserView[]>allUsers.Items.filter(user =>
+            `${user.first_name.toLowerCase()} ${user.last_name.toLowerCase()}`.startsWith(name.toLowerCase()) 
+            || user.user_name.toLowerCase().startsWith(name.toLowerCase())
+            )
+            .map(user => {
+                return <UserView>{
+                    'name': `${user.first_name} ${user.last_name}`,
+                    'userName': user.user_name,
+                    'id': user.id
+                }
+            });
     }
 }

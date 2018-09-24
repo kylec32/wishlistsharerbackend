@@ -205,6 +205,12 @@ export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context,
     })();
 });
 
+export const searchUsers: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+    (async () => {
+        cb(null, ResponseHelper.withJson(200, await userRepository.searchUsers(decodeURIComponent(event.pathParameters.name))));
+    })();
+});
+
 async function validateCaptcha(captcha: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
         request.post('https://www.google.com/recaptcha/api/siteverify',
