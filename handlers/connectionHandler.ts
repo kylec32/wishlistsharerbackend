@@ -12,12 +12,13 @@ const eventStore = new EventStore();
 
 export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
-        if(await userRepository.userExists(decodeURIComponent(event.pathParameters.identifier))) {
+        if(await userRepository.userExists(decodeURIComponent(event.pathParameters.identifier.toLowerCase()))) {
             eventStore.publish(context.awsRequestId, "connect-user", {"connector": event.requestContext.authorizer.principalId,
-                                                                        "connecteeEmailAddres":  decodeURIComponent(event.pathParameters.identifier)});
+                                                                        "connecteeEmailAddres":  decodeURIComponent(event.pathParameters.identifier.toLowerCase())});
             cb(null, ResponseHelper.simpleMessage(200, "Accounts Linked"));
         } else {
-
+            eventStore.publish(context.awsRequestId, "unable-to-connect-user", {"connector": event.requestContext.authorizer.principalId,
+            "connecteeEmailAddres":  decodeURIComponent(event.pathParameters.identifier)});
             cb(null, ResponseHelper.simpleMessage(404, "User not found"));
         }
     })()
