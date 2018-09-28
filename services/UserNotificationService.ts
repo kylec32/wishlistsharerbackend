@@ -26,7 +26,7 @@ export class UserNotificationService {
                 A gift that you purchased for ${user.first_name} ${user.last_name} has had it's information changed.
                 <br/>
                 <br/>
-                New Present: <a href="${present.url}">${present.title}</a>
+                New Present: ${this.getPresentLink(present)}
                 `).then(result => console.log(`Email sent on change to package: ${presentId}`))
                 .catch(error => {
                     console.error("Error sending email for changed present");
@@ -45,7 +45,7 @@ export class UserNotificationService {
             A gift that you purchased for ${listUser.first_name} ${listUser.last_name} has been removed from their list.
             <br/>
             <br/>
-            Removed Present: <a href="${deletedPresent.url}">${deletedPresent.title}</a>
+            Removed Present: ${this.getPresentLink(deletedPresent)}
             `).then(result => console.log(`Email sent on delete to package: ${deletedPresent.id}`))
             .catch(error => {
                 console.error("Error sending email for changed present");
@@ -64,9 +64,17 @@ export class UserNotificationService {
             ${listUser.first_name} ${listUser.last_name} just added a new gift to their list!
             <br/>
             <br/>
-            New Item: <a href="${newPresent.url}">${newPresent.title}</a>
+            New Item: ${this.getPresentLink(newPresent)}
             `)
         });
+    }
+
+    private getPresentLink(present: Present): string {
+        if(present.url == undefined) {
+            return present.title;
+        } else {
+            return `<a href="${present.url}">${present.title}</a>`
+        }
     }
 }
 
