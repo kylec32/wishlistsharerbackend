@@ -9,6 +9,7 @@ export class ResponseHelper {
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
+                'Access-Control-Max-Age': '86400',
                 'Content-Type': 'application/json',
             }
         };

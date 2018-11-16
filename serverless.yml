@@ -71,7 +71,9 @@ functions:
       - http:
           method: post
           path: sign-up
-          cors: true
+          cors:
+            origin: '*'
+            maxAge: 86400
   handleSignUpEmail:
     handler: handlers/email-handler.handleNewUser
     events:
@@ -87,14 +89,18 @@ functions:
       - http:
           method: post
           path: sign-in
-          cors: true
+          cors:
+            origin: '*'
+            maxAge: 86400
   forgottenPassword:
     handler: handlers/user-management.forgottenPassword
     events:
       - http:
           method: post
           path: reset/{email}
-          cors: true
+          cors:
+            origin: '*'
+            maxAge: 86400
           request:
             parameters:
               paths:
@@ -114,7 +120,9 @@ functions:
       - http:
           method: post
           path: /reset
-          cors: true
+          cors:
+            origin: '*'
+            maxAge: 86400
   handleResetPassword:
     handler: handlers/user-management.handleResetPassword
     events:
@@ -134,8 +142,12 @@ functions:
             parameters:
               paths:
                 identifier: true
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   handleConnectUsers:
     handler: handlers/connectionHandler.handleConnectUsers
     events:
@@ -151,23 +163,33 @@ functions:
       - http:
           method: post
           path: /event-processor
-          cors: true
+          cors:
+            origin: '*'
+            maxAge: 86400
   getFollowers:
     handler: handlers/connectionHandler.getConnections
     events:
       - http:
           method: get
           path: /connections
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   searchUsers:
     handler: handlers/user-management.searchUsers
     events:
       - http:
           method: get
           path: /users/{name}
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   deleteConnection:
     handler: handlers/connectionHandler.deleteConnection
     events:
@@ -178,8 +200,12 @@ functions:
             parameters:
               paths:
                 identifier: true
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   handleDisconnectUser:
     handler: handlers/connectionHandler.handleDisconnectUser
     events:
@@ -210,8 +236,12 @@ functions:
       - http:
           method: post
           path: /my/presents
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   handlePresentNotifications:
     handler: handlers/presentHandler.handlePresentNotifications
     timeout: 30
@@ -237,8 +267,12 @@ functions:
       - http:
           method: get
           path: /my/presents
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   updatePresent:
     handler: handlers/presentHandler.update
     events:
@@ -249,8 +283,12 @@ functions:
             parameters:
               paths:
                 presentId: true
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   handleUpdatePresent:
     handler: handlers/presentHandler.handleUpdate
     events:
@@ -270,8 +308,12 @@ functions:
             parameters:
               paths:
                 presentId: true
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   markPresentAsPurchased:
     handler: handlers/presentHandler.markAsPurchased
     events:
@@ -283,8 +325,12 @@ functions:
               paths:
                 userId: true
                 presentId: true
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   handleMarkPresentAsPurchased:
     handler: handlers/presentHandler.handleMarkAsPurchased
     events:
@@ -306,7 +352,9 @@ functions:
                 userId: true
                 presentId: true
           cors: true
-          authorizer: authorizer
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
   handleUnmarkPresentAsPurchased:
     handler: handlers/presentHandler.handleUnmarkAsPurchased
     events:
@@ -331,8 +379,12 @@ functions:
       - http:
           method: get
           path: /presents
-          cors: true
-          authorizer: authorizer
+          cors:
+            origin: '*'
+            maxAge: 86400
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 600
 
 
 custom:
@@ -349,6 +401,7 @@ resources:  # CloudFormation template syntax
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Max-Age: "86400"
           gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,PUT,POST,DELETE'"
         ResponseType: DEFAULT_4XX

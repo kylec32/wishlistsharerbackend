@@ -69,6 +69,21 @@ export class UserNotificationService {
         });
     }
 
+    async notifyFollowersOfPresentPurchased(listUserId: string, purchasedPresent: Present, purchasingUser: string) {
+        const listUser = await this.userRepository.getUserById(listUserId);
+        const followingUsers = await this.userRepository.usersThatFollowUserId(listUserId);
+
+        followingUsers.filter(user => user.id != purchasingUser).forEach(user => {
+            this.emailService.sendHtmlMessage(user.user_name, "User You Follow Has Had a Present Purchased",
+            `
+            ${listUser.first_name} ${listUser.last_name} just had a present purchased from their list!
+            <br/>
+            <br/>
+            Purchased Item: ${this.getPresentLink(purchasedPresent)}
+            `)
+        });
+    }
+
     private getPresentLink(present: Present): string {
         if(present.url == undefined) {
             return present.title;

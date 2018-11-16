@@ -3,6 +3,7 @@ import { EventStore } from '../services/EventStore';
 import { ResponseHelper } from '../utils/ResponseHelper';
 import { Utils } from '../utils/Utils';
 import { PresentService } from '../services/PresentService';
+import { Present } from '../models/Present';
 import { UserNotificationService } from '../services/UserNotificationService';
 var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
 
@@ -77,7 +78,21 @@ export const handlePresentNotifications: Handler = iopipe((event: DynamoDBStream
                                         console.error(error);
                                     });
             });
-    
+
+            Utils.filterEventStream('present-purchased', event, (data, sourceRecord) => {
+                presentService.getUserPresents(data.targetUserId).then(presents => {
+                    const present = <Present>presents.filter(present => present.id == data.presentId)[0];
+                    userNotificationService.notifyFollowersOfPresentPurchased(data.targetUserId, present, data.userId)
+                        .then((event) => {
+                            eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, 'present-purchased-notification-sent', Utils.getEvent(sourceRecord).Payload);
+                        })
+                        .catch((error) => {
+                            console.log("Error");
+                            console.error(error);
+                        });
+                }).catch(error => console.error(error));
+            });
+
             cb(null, "Handled");
         } catch(ex) {
             console.error(ex);
