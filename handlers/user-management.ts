@@ -61,7 +61,7 @@ export const signIn: Handler = iopipe((event: APIGatewayEvent, context: Context,
             if(await bcryptjs.compare(`${body.emailAddress.toLowerCase()}_${body.password}`, user.password)) {
                 eventStore.publish(context.awsRequestId, 'login-succeeded', {"userName": body.emailAddress});
                
-               const token = jwt.sign({'user_id': user.id,}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 60 * 8 });
+               const token = jwt.sign({'user_id': user.id,}, privateKey, { algorithm: 'RS256', expiresIn: 60 * 60 * 24 });
                cb(null, ResponseHelper.withJson(200, {'found': true, 
                                                         'token': token}));
             } else {
