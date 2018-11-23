@@ -92,8 +92,9 @@ export const handlePresentNotifications: Handler = iopipe((event: DynamoDBStream
                         });
                 }).catch(error => console.error(error));
             });
-                                    
+                                    console.log(event);
                Utils.filterEventStream('present-unpurchased', event, (data, sourceRecord) => {
+                   console.log("entered thing");
                 presentService.getUserPresents(data.targetUserId).then(presents => {
                     const present = <Present>presents.filter(present => present.id == data.presentId)[0];
                  userNotificationService.notifyFollowersOfPresentUnpurchased(data.targetUserId, present, data.userId)
