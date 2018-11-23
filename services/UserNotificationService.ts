@@ -83,6 +83,21 @@ export class UserNotificationService {
             `)
         });
     }
+    
+    async notifyFollowersOfPresentUnpurchased(listUserId: string, purchasedPresent: Present, unpurchasingUser: string) {
+        const listUser = await this.userRepository.getUserById(listUserId);
+        const followingUsers = await this.userRepository.usersThatFollowUserId(listUserId);
+
+        followingUsers.filter(user => user.id != unpurchasingUser).forEach(user => {
+            this.emailService.sendHtmlMessage(user.user_name, "Present of Person You Follow is No Longer Marked as Purchased",
+            `
+            A present that was previously marked as purchased for ${listUser.first_name} ${listUser.last_name} is available to be purchased again. The previous purchaser apparently backed out.
+            <br/>
+            <br/>
+            Item: ${this.getPresentLink(purchasedPresent)}
+            `)
+        });
+    }
 
     private getPresentLink(present: Present): string {
         if(present.url == undefined) {
