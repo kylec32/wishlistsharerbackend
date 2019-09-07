@@ -8,14 +8,14 @@ import { EventStore } from '../services/EventStore';
 import { ResponseHelper } from '../utils/ResponseHelper';
 import * as request from 'request';
 import { Utils } from '../utils/Utils';
-var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
+const thundra = require("@thundra/core")({ apiKey: process.env.THUNDRA_API_KEY });
 
 const eventStore = new EventStore();
 const userRepository = new UserRepository();
 const privateKey = fs.readFileSync('./keys/private.key');
 const publicKey = fs.readFileSync('./keys/public.key');
 
-export const authorizer: Handler = iopipe((event: CustomAuthorizerEvent, context: Context, cb: any) => {
+export const authorizer: Handler = thundra((event: CustomAuthorizerEvent, context: Context, cb: any) => {
 
     if (event.authorizationToken) {
         // remove "bearer " from token
@@ -52,7 +52,7 @@ function generatePolicy(principalId, effect, resource): CustomAuthorizerResult {
     return authResponse;
 };
 
-export const signIn: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const signIn: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     const body = JSON.parse(event.body);
     (async() => {
         try {
@@ -82,7 +82,7 @@ export const signIn: Handler = iopipe((event: APIGatewayEvent, context: Context,
     })();
 });
 
-export const handleSignUpEvent: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleSignUpEvent: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     Utils.filterEventStream("sign-up", event, (data, sourceRecord: DynamoDBRecord) => {
         (async() => {
             await userRepository.createUser(data.firstName,
@@ -100,7 +100,7 @@ export const handleSignUpEvent: Handler = iopipe((event: DynamoDBStreamEvent, co
     cb(null, "Handled Sign Up");
 });
 
-export const forgottenPassword: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const forgottenPassword: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             const forgottenPasswordUser = await userRepository.getUser(event.pathParameters.email.toLowerCase());
@@ -122,7 +122,7 @@ export const forgottenPassword: Handler = iopipe((event: APIGatewayEvent, contex
     })();
 });
 
-export const resetPassword: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const resetPassword: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             const body = JSON.parse(event.body);
@@ -143,7 +143,7 @@ export const resetPassword: Handler = iopipe((event: APIGatewayEvent, context: C
     })();
 });
 
-export const handleResetPassword: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleResetPassword: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async() => {
         Utils.filterEventStream('reset-password', event, (data, sourceRecord) => {
             try {
@@ -163,7 +163,7 @@ export const handleResetPassword: Handler = iopipe((event: DynamoDBStreamEvent, 
     })();
 });
 
-export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const signUp: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
 
         try {
@@ -205,7 +205,7 @@ export const signUp: Handler = iopipe((event: APIGatewayEvent, context: Context,
     })();
 });
 
-export const searchUsers: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const searchUsers: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         cb(null, ResponseHelper.withJson(200, await userRepository.searchUsers(decodeURIComponent(event.pathParameters.name))));
     })();

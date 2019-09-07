@@ -4,13 +4,13 @@ import { ResponseHelper } from '../utils/ResponseHelper';
 import { ConnectionService } from '../services/ConnectionService';
 import { EventStore } from '../services/EventStore';
 import { Utils } from '../utils/Utils';
-var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
+const thundra = require("@thundra/core")({ apiKey: process.env.THUNDRA_API_KEY });
 
 const userRepository = new UserRepository();
 const connectionService = new ConnectionService();
 const eventStore = new EventStore();
 
-export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const addNew: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         if(await userRepository.userExists(decodeURIComponent(event.pathParameters.identifier.toLowerCase()))) {
             eventStore.publish(context.awsRequestId, "connect-user", {"connector": event.requestContext.authorizer.principalId,
@@ -24,7 +24,7 @@ export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context,
     })()
 });
 
-export const handleConnectUsers: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleConnectUsers: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async() => {
         event.Records.forEach((record) => {
             Utils.filterEvent('connect-user', record, (data) => {
@@ -44,7 +44,7 @@ export const handleConnectUsers: Handler = iopipe((event: DynamoDBStreamEvent, c
     })();
 });
 
-export const handleConnectUsers2: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleConnectUsers2: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async() => {
         event.Records.forEach((record) => {
             
@@ -57,7 +57,7 @@ export const handleConnectUsers2: Handler = iopipe((event: DynamoDBStreamEvent, 
     })();
 });
 
-export const getConnections: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const getConnections: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             const result = await connectionService.getFollowees(event.requestContext.authorizer.principalId);
@@ -70,7 +70,7 @@ export const getConnections: Handler = iopipe((event: APIGatewayEvent, context: 
     })();
 });
 
-export const deleteConnection: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const deleteConnection: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             eventStore.publish(context.awsRequestId, "disconnect-user",
@@ -84,7 +84,7 @@ export const deleteConnection: Handler = iopipe((event: APIGatewayEvent, context
     })();
 });
 
-export const handleDisconnectUser: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleDisconnectUser: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async() => {
         try {
             

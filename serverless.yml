@@ -1,3 +1,5 @@
+org: kylec32
+app: wishlistsharer
 service:
   name: wishListSharer
 
@@ -12,12 +14,10 @@ provider:
   region: us-west-2
   memorySize: 256
   environment: 
-    IOPIPE_TOKEN: ${env:IOPIPE_TOKEN}
-    IOPIPE_TRACE_AUTO_HTTP_ENABLED: true
     CAPTCHA_SECRET: ${env:CAPTCHA_SECRET}
     MAILGUN_API_KEY: ${env:MAILGUN_API_KEY}
-    #AWS_REGION: ${opt:region, 'us-west-2'}
     AWS_ACCOUNT_ID: ${env:AWS_ACCOUNT_ID}
+    THUNDRA_API_KEY: ${env:THUNDRA_API_KEY}
   iamRoleStatements:
     -  Effect: "Allow"
        Action:
@@ -390,7 +390,7 @@ functions:
 custom:
   stage: "${opt:stage, self:provider.stage}"
 
-resources:  # CloudFormation template syntax
+resources:
   Resources:
     ApiGatewayRestApi:
       Type: AWS::ApiGateway::RestApi
@@ -401,7 +401,6 @@ resources:  # CloudFormation template syntax
       Properties:
         ResponseParameters:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-          gatewayresponse.header.Access-Control-Max-Age: "86400"
           gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
           gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,PUT,POST,DELETE'"
         ResponseType: DEFAULT_4XX

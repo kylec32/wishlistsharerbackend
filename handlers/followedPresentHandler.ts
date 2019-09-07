@@ -1,11 +1,11 @@
 import { APIGatewayEvent, DynamoDBStreamEvent, Callback, Context, Handler } from 'aws-lambda';
 import { ResponseHelper } from '../utils/ResponseHelper';
 import { PresentService } from '../services/PresentService';
-var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
+const thundra = require("@thundra/core")({ apiKey: process.env.THUNDRA_API_KEY });
 
 const presentService = new PresentService();
 
-export const getPresents: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const getPresents: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             cb(null, ResponseHelper.withJson(200,

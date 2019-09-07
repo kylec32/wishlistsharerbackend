@@ -2,11 +2,11 @@ import { SNSEvent, SNSEventRecord, Callback, Context, Handler } from 'aws-lambda
 import { DynamoDB } from 'aws-sdk';
 import { PutItemInput } from 'aws-sdk/clients/dynamodb';
 import { Event } from '../models/Event';
-var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
+const thundra = require("@thundra/core")({ apiKey: process.env.THUNDRA_API_KEY });
 
 const client = new DynamoDB.DocumentClient({region: process.env.AWS_REGION});
 
-export const persistEvent: Handler = iopipe((event: SNSEvent, context: Context, cb: Callback) => {
+export const persistEvent: Handler = thundra((event: SNSEvent, context: Context, cb: Callback) => {
 
   event.Records.forEach((record: SNSEventRecord) => {
 

@@ -5,13 +5,13 @@ import { Utils } from '../utils/Utils';
 import { PresentService } from '../services/PresentService';
 import { Present } from '../models/Present';
 import { UserNotificationService } from '../services/UserNotificationService';
-var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
+const thundra = require("@thundra/core")({ apiKey: process.env.THUNDRA_API_KEY });
 
 const eventStore = new EventStore();
 const presentService = new PresentService();
 const userNotificationService = new UserNotificationService();
 
-export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const addNew: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "add-present", {"userId": event.requestContext.authorizer.principalId,
                                                                     "present": event.body});
@@ -20,7 +20,7 @@ export const addNew: Handler = iopipe((event: APIGatewayEvent, context: Context,
     })()
 });
 
-export const handleAddNew: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleAddNew: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -43,7 +43,7 @@ export const handleAddNew: Handler = iopipe((event: DynamoDBStreamEvent, context
     })();
 });
 
-export const handlePresentNotifications: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handlePresentNotifications: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             Utils.filterEventStream('present-added', event, (data, sourceRecord) => {
@@ -116,7 +116,7 @@ export const handlePresentNotifications: Handler = iopipe((event: DynamoDBStream
     })();
 });
 
-export const update: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const update: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "update-present", {"userId": event.requestContext.authorizer.principalId,
                                                                     "presentId": event.pathParameters.presentId,
@@ -126,7 +126,7 @@ export const update: Handler = iopipe((event: APIGatewayEvent, context: Context,
     })()
 });
 
-export const handleUpdate: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleUpdate: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             Utils.filterEventStream('update-present', event, (data, sourceRecord) => {
@@ -148,7 +148,7 @@ export const handleUpdate: Handler = iopipe((event: DynamoDBStreamEvent, context
     })();
 });
 
-export const getUserPresents: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const getUserPresents: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             cb(null, ResponseHelper.withJson(200, await presentService.getUserPresents(event.requestContext.authorizer.principalId)));
@@ -160,7 +160,7 @@ export const getUserPresents: Handler = iopipe((event: APIGatewayEvent, context:
     })();
 });
 
-export const deletePresent: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const deletePresent: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "delete-present", {"userId": event.requestContext.authorizer.principalId,
                                                                     "presentId": decodeURIComponent(event.pathParameters.presentId)});
@@ -169,7 +169,7 @@ export const deletePresent: Handler = iopipe((event: APIGatewayEvent, context: C
     })();
 });
 
-export const handleDeletePresent: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleDeletePresent: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -194,7 +194,7 @@ export const handleDeletePresent: Handler = iopipe((event: DynamoDBStreamEvent, 
     })();
 });
 
-export const markAsPurchased: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const markAsPurchased: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "mark-present-as-purchased", {"userId": event.requestContext.authorizer.principalId,
                                                                     "targetUserId": decodeURIComponent(event.pathParameters.userId),
@@ -204,7 +204,7 @@ export const markAsPurchased: Handler = iopipe((event: APIGatewayEvent, context:
     })();
 });
 
-export const handleMarkAsPurchased: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleMarkAsPurchased: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -228,7 +228,7 @@ export const handleMarkAsPurchased: Handler = iopipe((event: DynamoDBStreamEvent
     })();
 });
 
-export const unmarkAsPurchased: Handler = iopipe((event: APIGatewayEvent, context: Context, cb: Callback) => {
+export const unmarkAsPurchased: Handler = thundra((event: APIGatewayEvent, context: Context, cb: Callback) => {
     (async () => {
         await eventStore.publish(context.awsRequestId, "unmark-present-as-purchased", {"userId": event.requestContext.authorizer.principalId,
                                                                     "targetUserId": decodeURIComponent(event.pathParameters.userId),
@@ -238,7 +238,7 @@ export const unmarkAsPurchased: Handler = iopipe((event: APIGatewayEvent, contex
     })();
 });
 
-export const handleUnmarkAsPurchased: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleUnmarkAsPurchased: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             

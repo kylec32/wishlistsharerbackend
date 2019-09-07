@@ -2,12 +2,12 @@ import { DynamoDBStreamEvent, Callback, Context, Handler, APIGatewayEvent } from
 import { Utils } from '../utils/Utils';
 import { EmailService } from '../services/EmailService';
 import { EventStore } from '../services/EventStore';
-var iopipe = require('@iopipe/iopipe')({ token: process.env.IOPIPE_TOKEN });
+const thundra = require("@thundra/core")({ apiKey: process.env.THUNDRA_API_KEY });
 
 
 const eventStore = new EventStore();
 const emailService: EmailService = new EmailService();
-export const handleNewUser: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleNewUser: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             
@@ -32,13 +32,13 @@ export const handleNewUser: Handler = iopipe((event: DynamoDBStreamEvent, contex
     })();
 });
 
-export const handleForgottenPassword: Handler = iopipe((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
+export const handleForgottenPassword: Handler = thundra((event: DynamoDBStreamEvent, context: Context, cb: Callback) => {
     (async () => {
         try {
             Utils.filterEventStream('forgotten-password', event, (data, sourceRecord) => {
                 const resetUrl = `https://wishlistsharer.tk/reset/${data.email}/${data.token}`;
                 emailService.sendHtmlMessage(data.email,
-                                            "Forgotten Password: WishListSharer.tk",
+                                            "Forgotten Password: WishListSharer",
                                             `A request for a password reset has been made for your account. If you did not make this request there is no action to be taken.<br/><br/>If you did request this reset please follow this link: <a href="${resetUrl}">${resetUrl}</a><br/><br/>This link will expire in 15 minutes.`)
                             .then(value => eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, "forgotten-password-email-sent", value))
                             .catch(error => 
