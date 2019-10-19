@@ -6,7 +6,7 @@ service:
 plugins:
   - serverless-webpack
   - serverless-offline
-  - serverless-nested-stack
+  - serverless-plugin-split-stacks
 
 provider:
   name: aws
@@ -31,12 +31,20 @@ provider:
          - "dynamodb:GetShardIterator"
          - "dynamodb:ListStreams"
        Resource:
-        - Fn::GetAtt:
-          - eventsTable
-          - Arn
-        - Fn::GetAtt:
-          - userTable
-          - Arn
+        - Fn::Join:
+            - ""
+            - - "arn:aws:dynamodb:"
+              - Ref: "AWS::Region"
+              - ":"
+              - Ref: "AWS::AccountId"
+              - ":table/eventsTable"
+        - Fn::Join:
+            - ""
+            - - "arn:aws:dynamodb:"
+              - Ref: "AWS::Region"
+              - ":"
+              - Ref: "AWS::AccountId"
+              - ":table/userTable"
     -  Effect: "Allow"
        Action:
          - "SNS:Publish"
@@ -80,10 +88,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   signIn:
     handler: handlers/user-management.signIn
     events:
@@ -111,10 +116,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   resetPassword:
     handler: handlers/user-management.resetPassword
     events:
@@ -129,10 +131,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   followNew:
     handler: handlers/connectionHandler.addNew
     events:
@@ -154,10 +153,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   eventProcess:
     handler: services/EventProcessor.verify
     events:
@@ -212,10 +208,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   verify:
     handler: handlers/user-management.verify
     events:
@@ -227,10 +220,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   addPresent:
     handler: handlers/presentHandler.addNew
     events:
@@ -249,19 +239,13 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   handleAddPresent:
     handler: handlers/presentHandler.handleAddNew
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   getUserPresents:
     handler: handlers/presentHandler.getUserPresents
     events:
@@ -295,10 +279,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   deletePresent:
     handler: handlers/presentHandler.deletePresent
     events:
@@ -337,10 +318,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   unmarkPresentAsPurchased:
     handler: handlers/presentHandler.unmarkAsPurchased
     events:
@@ -361,19 +339,13 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   handleDeletePresent:
     handler: handlers/presentHandler.handleDeletePresent
     events:
       - stream:
           type: dynamodb
-          arn:
-            Fn::GetAtt:
-              - eventsTable
-              - StreamArn
+          arn: arn:aws:dynamodb:us-west-2:927245588110:table/eventsTable/stream/2018-09-23T03:49:08.215
   getFollowedPresents:
     handler: handlers/followedPresentHandler.getPresents
     events:
@@ -390,6 +362,10 @@ functions:
 
 custom:
   stage: "${opt:stage, self:provider.stage}"
+  splitStacks:
+    perFunction: false
+    perType: true
+    perGroupFunction: false
 
 resources:
   Resources:

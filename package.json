@@ -26,6 +26,7 @@
     "serverless-nested-stack": "0.0.7",
     "serverless-offline": "^3.33.0",
     "serverless-offline-sqs": "^1.6.1",
+    "serverless-plugin-split-stacks": "^1.9.1",
     "serverless-secrets-plugin": "^0.1.0",
     "serverless-webpack": "^5.3.1",
     "source-map-support": "^0.5.13",
