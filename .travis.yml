@@ -2,7 +2,7 @@
 
 language: node_js
 node_js:
-  - "8.9"
+  - "10"
 
 branches:
   only:
@@ -15,7 +15,7 @@ before_script:
   - ./retrieve-keys.sh
 
 script:
-  - echo 'hello'
+  - echo 'No testing currently'
 
 after_success:
   - sls deploy
