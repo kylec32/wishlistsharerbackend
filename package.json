@@ -23,6 +23,7 @@
     "@types/request": "^2.48.2",
     "@types/uuid": "^3.4.5",
     "add-asset-webpack-plugin": "^0.1.0",
+    "serverless-nested-stack": "0.0.7",
     "serverless-offline": "^3.33.0",
     "serverless-offline-sqs": "^1.6.1",
     "serverless-secrets-plugin": "^0.1.0",
