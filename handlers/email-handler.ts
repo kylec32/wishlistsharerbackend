@@ -12,7 +12,7 @@ export const handleNewUser: Handler = thundra((event: DynamoDBStreamEvent, conte
         try {
             
             Utils.filterEventStream('signed-up', event, (data, sourceRecord) => {
-                emailService.sendTextMessage(data.user_name, "Welcome to WishListSharer.tk", "Welcome to WishListSharer!\n\nBe sure to invite your friends to join as well as a wish list is no fun if no one uses it.")
+                emailService.sendTextMessage(data.user_name, "Welcome to WishListSharer", "Welcome to WishListSharer!\n\nBe sure to invite your friends to join as well as a wish list is no fun if no one uses it.")
                             .then(value => eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, "welcome-email-sent", value))
                             .catch(error => 
                                 {
