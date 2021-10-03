@@ -213,7 +213,7 @@ export const searchUsers: Handler = thundra((event: APIGatewayEvent, context: Co
 
 async function validateCaptcha(captcha: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-        request.post('https://www.google.com/recaptcha/api/siteverify',
+        request.post('https://hcaptcha.com/siteverify',
         {form: {
                     secret: process.env.CAPTCHA_SECRET,
                     response: captcha

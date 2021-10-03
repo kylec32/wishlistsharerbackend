@@ -36,11 +36,15 @@ export const handleForgottenPassword: Handler = thundra((event: DynamoDBStreamEv
     (async () => {
         try {
             Utils.filterEventStream('forgotten-password', event, (data, sourceRecord) => {
-                const resetUrl = `https://wishlistsharer.tk/reset/${data.email}/${data.token}`;
+                console.log("Request came in");
+                const resetUrl = `https://wishlistsharer.web.app/reset/${data.email}/${data.token}`;
                 emailService.sendHtmlMessage(data.email,
                                             "Forgotten Password: WishListSharer",
                                             `A request for a password reset has been made for your account. If you did not make this request there is no action to be taken.<br/><br/>If you did request this reset please follow this link: <a href="${resetUrl}">${resetUrl}</a><br/><br/>This link will expire in 15 minutes.`)
-                            .then(value => eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, "forgotten-password-email-sent", value))
+                            .then(value => {
+                                console.log("success emailing");
+                                eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, "forgotten-password-email-sent", value)
+                            })
                             .catch(error => 
                                 {
                                     eventStore.publish(Utils.getEvent(sourceRecord).CorrelationId, "forgotten-password-email-unsuccessfully-sent", {});

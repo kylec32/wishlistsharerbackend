@@ -368,6 +368,101 @@ custom:
 
 resources:
   Resources:
+    SignInLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    AuthorizerLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    SignUpLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    HandleSignUpEmailLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    ForgottenPasswordLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    HandleForgottenPasswordLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    ResetPasswordLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    HandleResetPasswordLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    FollowNewLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    HandleConnectUsersLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    EventProcessLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    GetFollowersLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    SearchUsersLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    DeleteConnectionLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    HandleDisconnectUserLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    VerifyLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    HandleSignUpEventLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    AddPresentLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
+    GetFollowedPresentsLambdaFunction:
+      Type: AWS::Lambda::Function
+      Properties:
+        Architectures:
+          - arm64
     ApiGatewayRestApi:
       Type: AWS::ApiGateway::RestApi
       Properties:

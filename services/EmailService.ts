@@ -9,7 +9,7 @@ export class EmailService {
             "Messages":[
               {
                 "From": {
-                  "Email": "noreply@wishlistsharer.web.app",
+                  "Email": "noreply@scaledcode.com",
                   "Name": "WishlistSharer"
                 },
                 "To": [
@@ -31,7 +31,7 @@ export class EmailService {
                 "Messages":[
                   {
                     "From": {
-                      "Email": "noreply@wishlistsharer.web.app",
+                      "Email": "noreply@scaledcode.com",
                       "Name": "WishlistSharer"
                     },
                     "To": [
