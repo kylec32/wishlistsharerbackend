@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@thundra/core": "^2.5.10",
-    "aws-sdk": "^2.302.0",
+    "aws-sdk": "^2.814.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.3.0",
     "request": "^2.88.0",
