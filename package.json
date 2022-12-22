@@ -10,7 +10,7 @@
     "@thundra/core": "^2.5.10",
     "aws-sdk": "^2.302.0",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^8.3.0",
+    "jsonwebtoken": "^9.0.0",
     "request": "^2.88.0",
     "typed-promisify": "^0.4.0",
     "uuid": "^3.3.2"
